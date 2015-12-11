@@ -29,3 +29,25 @@
     -webkit-box-shadow: rgba(0,0,0,0.2) 0 1px 3px inset;
     box-shadow: rgba(0,0,0,0.2) 0 1px 3px inset;
 }
+
+#busy_indicator {
+    background: none repeat scroll 0 0 black;
+    bottom: 0;
+    color: gray;
+    display: table;
+    font-size: 2em;
+    font-weight: bold;
+    height: 100%;
+    left: 0;
+    position: fixed;
+    text-align: center;
+    top: 0;
+    visibility: hidden;
+    width: 100%;
+    z-index: 1000;
+    opacity: 0.2;
+}
+#span_img {
+    display: table-cell;
+    vertical-align: middle;
+}

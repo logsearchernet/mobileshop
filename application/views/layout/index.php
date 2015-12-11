@@ -104,6 +104,10 @@
                 </div>
             </div>
             
-
+            <div id="busy_indicator" align="center" style="visibility: hidden;">
+                <span id="span_img">
+                    <img id="load_img" align="middle" height="35" width="43" alt="busy indicator" src="<?php echo site_url('img/busy.gif')?>"/>
+                </span>
+            </div>    
 	</body>
 </html>

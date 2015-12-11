@@ -1,22 +1,18 @@
 
+    
 <div class="row">
-    <div class="col-lg-4">
+    <div class="col-lg-6">
 
         <ul class="breadcrumb page-breadcrumb">
             <li class="breadcrumb-container">
                 <a href="<?php echo site_url('product') ?>">Catalog</a>				
             </li>
             <li class="breadcrumb-current">
-                <a href="<?php echo site_url('category/category') ?>">Categories</a>
+                <a href="<?php echo site_url('category') ?>">Categories</a>
             </li>
         </ul>
     </div>
-    <div class="col-lg-4">
-        <div id="ajax-message" class="alert alert-success">
-        <i class="fa fa-check-circle"> </i> The status has been updated successfully
-    </div>
-    </div>
-    <div class="col-lg-4">
+    <div class="col-lg-6">
         <div class="btn-toolbar">
             <a href="#" class="toolbar_btn dropdown-toolbar navbar-toggle" data-toggle="collapse" data-target="#toolbar-nav"><i class="process-icon-dropdown"></i><div>Menu</div></a>
             <ul id="toolbar-nav" class="nav nav-pills pull-right collapse navbar-collapse">
@@ -34,13 +30,13 @@
 
     
 
-    <div id="alert-success" class="alert alert-success">
+    <div id="alert-updated" class="alert alert-success hidden">
         <i class="fa fa-check-circle"> </i> Successful update
         <button type="button" class="close" data-dismiss="alert">×</button>
     </div>
 
 
-    <div id="alert-fail" class="alert alert-danger">
+    <div id="alert-fail" class="alert alert-danger hidden">
         <i class="fa fa-check-circle"> </i> Failed update
         <button type="button" class="close" data-dismiss="alert">×</button>
     </div>
@@ -63,16 +59,16 @@
             <tr class="style-default-light">
                 <th><button id="clearFilter" class="btn btn-default">Clear</button></th>
                 <th>
-                    <input type="text" class="form-control clearfix filterColumn" id="id">
+                    <input type="text" class="form-control clearfix filterColumn" id="id" autocomplete="off">
                 </th>
                 <th>
-                    <input type="text" class="form-control clearfix filterColumn" id="name">
+                    <input type="text" class="form-control clearfix filterColumn" id="name" autocomplete="off">
                 </th>
                 <th>
-                    <input type="text" class="form-control clearfix filterColumn" id="description">
+                    <input type="text" class="form-control clearfix filterColumn" id="description" autocomplete="off">
                 </th>
                 <th>
-                    <input type="text" class="form-control clearfix filterColumn" id="position">
+                    <input type="text" class="form-control clearfix filterColumn" id="position" autocomplete="off">
                 </th>
                 <th>
                     <select class="form-control clearfix filterColumn" id="displayed">
@@ -106,22 +102,25 @@
     <div id="page-selection"></div>
     <div class="card-body"></div>
 </div>
+<div style="z-index: 100;position:fixed;top:70px;right:0;width:500px;">
+    <div id="ajax-message" class="alert alert-success hidden">
+        <i class="fa fa-check-circle"> </i> The status has been updated successfully
+    </div>
+</div>
 <script>
 var basePath = "<?php echo site_url('')?>";
 var url = basePath+"category/ajax_category_table";
 var offset = 0;
-
+var totalCount = <?php echo $count?>;
+var limit = <?php echo $limit?>;
 $(document).ready(function(){
     
-    
-    
-    
     $(window).load(function(){
-        $('#ajax-message').hide();
-        $('#alert-success').hide();
-        $('#alert-fail').hide();
-        
+        var success = '<?php echo $success?>';
         var callbackName = "categoryTableInit";
+        if (success == 1){
+            callbackName = "categoryTable";
+        }
         var obj = new Object();
         obj.offset = 0;
         obj.filter = "";
@@ -131,20 +130,21 @@ $(document).ready(function(){
     });
     
     
-    
+    /*
     $('#page-selection').bootpag({
-        total: Math.ceil(<?php echo $count?> / <?php echo $limit?>),
+        total: Math.ceil(totalCount / limit),
         maxVisible: 5
     }).on("page", function(event,num){
-        $('.alert-success').hide();
+        $('#alert-updated').hide();
         var obj = new Object();
-        offset = (num - 1) * <?php echo $limit?>;
+        offset = (num - 1) * limit;
         obj.offset = offset;
         obj.filter = "";
         obj.filterName = "";
         obj.deleteItems = "";
+        var callbackName = "categoryTableInit";
         callAjax(obj, url, callbackName);
-    });
+    });*/
     
     $(document).on('keyup','.filterColumn', function(e) {
         var thisProname = "";
@@ -191,6 +191,8 @@ $(document).ready(function(){
     $(document).on('click','.submitdelete', function(e) {
         var deleteItems = $(this).attr('id');
         var obj = new Object();
+        offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
+        
         obj.offset = offset;
         obj.filter = "";
         obj.filterName = "";
@@ -202,14 +204,18 @@ $(document).ready(function(){
     $(document).on('click','#removeChecked', function(e) {
         var deleteItems = "";
         var total = $(':checkbox.checkItem').length;
+        var totalDel = 0;
         $(':checkbox.checkItem').each(function(index){
             if ($(this).is(':checked')) {
                 deleteItems += ($(this).val());
+                totalDel++;
             }
             if (index != total - 1){
                 deleteItems += "|";
             }
         }); 
+        
+        offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
         var obj = new Object();
         obj.offset = offset;
         obj.filter = "";
@@ -227,14 +233,48 @@ function callback(name, data) {
     if (name == 'categoryTableInit'){
         var content = new EJS({url: basePath+'template/categoryTable.ejs'}).render(data);
         $("#categoryTable").html(content);
+        
+        $('#page-selection').bootpag({
+            total: Math.ceil(data.totalCount / limit),
+            maxVisible: 5,
+            page: (offset / limit) + 1
+        }).on("page", function(event,num){
+            $('#alert-updated').hide();
+            var obj = new Object();
+            offset = (num - 1) * limit;
+            obj.offset = offset;
+            obj.filter = "";
+            obj.filterName = "";
+            obj.deleteItems = "";
+            var callbackName = "categoryTableInit";
+            callAjax(obj, url, callbackName);
+        });
     } else if (name == 'categoryTable') {
         var content = new EJS({url: basePath+'template/categoryTable.ejs'}).render(data);
         $("#categoryTable").html(content); 
-        $('#alert-success').fadeIn(1000);
-        $('#alert-success').fadeOut(3000);
+        $('#alert-updated').removeClass("hidden");
+        $('#alert-updated').fadeIn(500);
+        $('#alert-updated').fadeOut(3000);
+        
+        $('#page-selection').bootpag({
+            total: Math.ceil(data.totalCount / limit),
+            maxVisible: 5,
+            page: (offset / limit) + 1
+        }).on("page", function(event,num){
+            $('#alert-updated').hide();
+            var obj = new Object();
+            offset = (num - 1) * limit;
+            obj.offset = offset;
+            obj.filter = "";
+            obj.filterName = "";
+            obj.deleteItems = "";
+            var callbackName = "categoryTableInit";
+            callAjax(obj, url, callbackName);
+        });
     } else if (name == 'categoryDisplay'){
-        $('#ajax-message').fadeIn(1000);
-        $('#ajax-message').fadeOut(2000);
+        $('#ajax-message').removeClass("hidden");
+        $('#ajax-message').fadeIn(500);
+        $('#ajax-message').fadeOut(3000);
     }
 
 }

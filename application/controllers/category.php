@@ -11,13 +11,14 @@ class Category extends MY_Controller {
      * Index page for Dashboard controller.
      */
     public function index() {
-        
+        $success = $this->input->get('success');
         $this->load->model('Category_Entity');
         $where = NULL;
         $count = $this->Category_Entity->count_by($where);
         
         $this->data = array('count' => $count,
-                            'limit' => $this->limit);
+                            'limit' => $this->limit,
+                            'success' => $success);
         $this->content = 'category';
         $this->layout();
     }
@@ -84,6 +85,7 @@ class Category extends MY_Controller {
         $orderBy = "position asc";
         $count = $this->Category_Entity->count_by($where);
         $categories = $this->load_all($where, $this->limit, $offset, $orderBy);
+        $categories->totalCount = $count;
         
         echo json_encode($categories);
     }
@@ -111,7 +113,7 @@ class Category extends MY_Controller {
         $category = $this->save_category($this);
         $this->data = array('category' => $category);
         
-        redirect('/category', 'refresh');
+        redirect('/category/?success=1', 'refresh');
     }
     
     /*public function category_remove($id = NULL) {

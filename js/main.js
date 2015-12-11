@@ -1,5 +1,15 @@
+
 $(document).ready(function(){
-    
+    jQuery.ajaxSetup({
+        beforeSend: function(){
+            displayLoadIndc();
+        },
+        complete: function(){
+            hideLoadIndc();
+        },
+        success: function(){
+        }
+    });
 });
 
 var timeoutSetting = 70000;
@@ -25,5 +35,13 @@ function callAjax(obj, url, callbackName) {
   });
 }
 
-
+function hideLoadIndc() {
+    setTimeout(function(){
+        document.getElementById('busy_indicator').style.visibility = 'hidden';
+    }, 200 );
+	
+}
+function displayLoadIndc() {
+    document.getElementById('busy_indicator').style.visibility = 'visible';
+}
 
