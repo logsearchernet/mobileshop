@@ -10,7 +10,7 @@ class Category extends MY_Controller {
     /**
      * Index page for Dashboard controller.
      */
-    public function index() {
+    public function index($parent = 0) {
         $success = $this->input->get('success');
         $this->load->model('Category_Entity');
         $where = NULL;
@@ -18,7 +18,8 @@ class Category extends MY_Controller {
         
         $this->data = array('count' => $count,
                             'limit' => $this->limit,
-                            'success' => $success);
+                            'success' => $success,
+                            'parent' => $parent);
         $this->content = 'category';
         $this->layout();
     }
@@ -48,6 +49,7 @@ class Category extends MY_Controller {
         $data = json_decode($request_body);
         $this->output->set_content_type('application/json');
         
+        $parent = $data->parent;
         $offset = $data->offset;
         $filterName = $data->filterName;
         $filter = $data->filter;
@@ -57,7 +59,7 @@ class Category extends MY_Controller {
         $deleteItemArr = explode('|', $deleteItems);
         
         $this->load->model('Category_Entity');
-        $where = NULL;
+        $where = "parent_category = ". $parent;
         if (isset($filterName) && !empty($filterName) && strlen($filterName) > 0) {
             $where = "";
             $length = count($filterNameArr);
@@ -94,13 +96,39 @@ class Category extends MY_Controller {
         $this->load->helper('form');
         
         $this->load->model('Category_Entity');
+        $parent = 0;
         $category = new Category_Entity();
         if (isset($id)){
             $category->load($id);
+            $parent = $category->parent_category;
         } 
         
-        $this->data = array('category' => $category);
+        $where = NULL;
+        $cats = $this->Category_Entity->getByWhere($where);
+        $options = array();
+        $options["0"] = "Home";
+        foreach ($cats as $cat) {
+            $options[$cat->id] = $cat->name;
+        }
+        
+        $this->data = array('category' => $category,
+                            'options' => $options);
         $this->content = 'category_form';
+        $this->layout();
+    }
+    
+    public function category_view($parent = 0) {
+        $success = $this->input->get('success');
+        $this->load->model('Category_Entity');
+        $where = "parent_category = ". $parent;
+        $count = $this->Category_Entity->count_by($where);
+        
+        $this->data = array('count' => $count,
+                            'limit' => $this->limit,
+                            'success' => $success,
+                            'parent' => $parent);
+        
+        $this->content = 'category';
         $this->layout();
     }
     

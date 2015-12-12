@@ -113,6 +113,7 @@ var url = basePath+"category/ajax_category_table";
 var offset = 0;
 var totalCount = <?php echo $count?>;
 var limit = <?php echo $limit?>;
+var parent = <?php echo $parent?>;
 $(document).ready(function(){
     
     $(window).load(function(){
@@ -122,29 +123,13 @@ $(document).ready(function(){
             callbackName = "categoryTable";
         }
         var obj = new Object();
+        obj.parent = parent;
         obj.offset = 0;
         obj.filter = "";
         obj.filterName = "";
         obj.deleteItems = "";
         callAjax(obj, url, callbackName);
     });
-    
-    
-    /*
-    $('#page-selection').bootpag({
-        total: Math.ceil(totalCount / limit),
-        maxVisible: 5
-    }).on("page", function(event,num){
-        $('#alert-updated').hide();
-        var obj = new Object();
-        offset = (num - 1) * limit;
-        obj.offset = offset;
-        obj.filter = "";
-        obj.filterName = "";
-        obj.deleteItems = "";
-        var callbackName = "categoryTableInit";
-        callAjax(obj, url, callbackName);
-    });*/
     
     $(document).on('keyup','.filterColumn', function(e) {
         var thisProname = "";
@@ -192,7 +177,7 @@ $(document).ready(function(){
         var deleteItems = $(this).attr('id');
         var obj = new Object();
         offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
-        
+        obj.parent = parent;
         obj.offset = offset;
         obj.filter = "";
         obj.filterName = "";
@@ -217,6 +202,7 @@ $(document).ready(function(){
         
         offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
         var obj = new Object();
+        obj.parent = parent;
         obj.offset = offset;
         obj.filter = "";
         obj.filterName = "";
@@ -242,6 +228,7 @@ function callback(name, data) {
             $('#alert-updated').hide();
             var obj = new Object();
             offset = (num - 1) * limit;
+            obj.parent = parent;
             obj.offset = offset;
             obj.filter = "";
             obj.filterName = "";
@@ -264,6 +251,7 @@ function callback(name, data) {
             $('#alert-updated').hide();
             var obj = new Object();
             offset = (num - 1) * limit;
+            obj.parent = parent;
             obj.offset = offset;
             obj.filter = "";
             obj.filterName = "";

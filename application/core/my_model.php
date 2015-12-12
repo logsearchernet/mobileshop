@@ -97,6 +97,22 @@ class MY_Model extends CI_Model {
         return $ret_val;
     }
     
+    public function getByWhere($where=NULL) {
+        if(isset($where) && !empty($where))
+        {
+            $this->db->where($where);
+        }
+        $ret_val = array();
+        $class = get_class($this);
+        $query = $this->db->get($this::DB_TABLE);
+        foreach ($query->result() as $row) {
+            $model = new $class;
+            $model->populate($row);
+            $ret_val[$row->{$this::DB_TABLE_PK}] = $model;
+        }
+        return $ret_val;
+    }
+    
     public function count_by($where = NULL){
         if (isset($where) && !empty($where)){
             $this->db->where($where);

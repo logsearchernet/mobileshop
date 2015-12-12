@@ -33,11 +33,8 @@ $inputAttributes = 'class="form-control"';
                     <?php echo form_label('Parent Category', 'parent_category', $labelAttributes); ?>
                     <div class=" col-sm-10">
                         <?php 
-                        $options = array(
-                            '0'  => 'Home',
-                          );
                         $attr = 'class="form-control"';
-                        echo form_dropdown('parent_category', $options, '0', $attr);
+                        echo form_dropdown('parent_category', $options, $category->parent_category, $attr);
                         ?>
                     </div>
                 </div>
