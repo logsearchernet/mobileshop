@@ -41,46 +41,62 @@
         <button type="button" class="close" data-dismiss="alert">×</button>
     </div>
 
-
+<ul class="breadcrumb">
+    <li>
+        <a href="<?php echo site_url('/category/category_view/');?>"><i class="fa fa-home"></i>Home</a>
+    </li>
+    <?php if (isset($categoryNames)): ?>
+    <?php foreach ($categoryNames as $id => $name):?>
+    <li>
+        <a href="<?php echo site_url('/category/category_view/'. $id); ?>"><?php echo $name;?></a>
+    </li>
+    <?php endforeach;?>
+    <?php endif; ?>
+</ul>
 
 <div class="card card-underline">
     <div class="card-head"><header>Categories<sup class="badge"><?php echo $count?></sup></header></div>
     <form class="form">
-    <table class="table table-hover">
+        <table class="table table-hover">
         <thead>
             <tr>
-                <th style="width: 10px;">&nbsp;</th>
-                <th style="width: 70px;">#</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Position</th>
-                <th>Displayed</th>
+                <th style="width: 10%;">&nbsp;</th>
+                <th style="width: 10%;">#</th>
+                <th style="width: 30%;">Name</th>
+                <th style="width: 30%;">Description</th>
+                <th style="width: 10%;">Position</th>
+                <th style="width: 10%;">Displayed</th>
             </tr>
             <tr class="style-default-light">
-                <th><button id="clearFilter" class="btn btn-default">Clear</button></th>
+                <th></th>
+                <th></th>
                 <th>
-                    <input type="text" class="form-control clearfix filterColumn" id="id" autocomplete="off">
+                    <div class="row input-outer"> 
+                        <input type="text" class="filterColumn" id="name" autocomplete="off">
+                        <i class="fa fa-close filter-clear"></i>
+                    </div>
                 </th>
                 <th>
-                    <input type="text" class="form-control clearfix filterColumn" id="name" autocomplete="off">
+                    <div class="row input-outer"> 
+                        <input type="text" class="filterColumn" id="description" autocomplete="off">
+                        <i class="fa fa-close filter-clear"></i>
+                    </div>
                 </th>
                 <th>
-                    <input type="text" class="form-control clearfix filterColumn" id="description" autocomplete="off">
                 </th>
                 <th>
-                    <input type="text" class="form-control clearfix filterColumn" id="position" autocomplete="off">
-                </th>
-                <th>
-                    <select class="form-control clearfix filterColumn" id="displayed">
+                    <div class="row input-outer">
+                    <select class="form-control filterColumn" id="displayed">
                         <option value="">---  All  ---</option>
                         <option value="1"> ON </option>
                         <option value="0"> OFF </option>
                     </select>  
+                    </div>
                 </th>
             </tr>
         </thead>
-        <tbody id="categoryTable">
-            
+        <tbody id="category-table">
+            <!-- LOAD AJAX With CONTENT -->
         </tbody>
     </table>
     </form>
@@ -110,6 +126,7 @@
 <script>
 var basePath = "<?php echo site_url('')?>";
 var url = basePath+"category/ajax_category_table";
+var updateSortPosition = basePath+"category/ajax_category_sort_position";
 var offset = 0;
 var totalCount = <?php echo $count?>;
 var limit = <?php echo $limit?>;
@@ -117,48 +134,23 @@ var parent = <?php echo $parent?>;
 $(document).ready(function(){
     
     $(window).load(function(){
+        
         var success = '<?php echo $success?>';
-        var callbackName = "categoryTableInit";
-        if (success == 1){
-            callbackName = "categoryTable";
-        }
-        var obj = new Object();
-        obj.parent = parent;
-        obj.offset = 0;
-        obj.filter = "";
-        obj.filterName = "";
-        obj.deleteItems = "";
-        callAjax(obj, url, callbackName);
+        renderTable(success);
     });
     
     $(document).on('keyup','.filterColumn', function(e) {
-        var thisProname = "";
-        var filterName = "";
-        var total = $('.filterColumn').length;
-        $('.filterColumn').each(function(index){
-            thisProname += $(this).val();
-            filterName +=  $(this).attr('id');
-            if (index != total - 1){
-                thisProname += "|";
-                filterName += "|";
-            }
-        });
-        filterByName(e, filterName, thisProname)
+        filterByName(e, parent);
     });
     
     $( "#displayed").change(function(e) {
-        var thisProname = "";
-        var filterName = "";
-        var total = $('.filterColumn').length;
-        $('.filterColumn').each(function(index){
-            thisProname += $(this).val();
-            filterName +=  $(this).attr('id');
-            if (index != total - 1){
-                thisProname += "|";
-                filterName += "|";
-            }
-        });
-        filterByName(e, filterName, thisProname)
+        filterByName(e, parent);
+    });
+    
+    $(document).on('click','.filter-clear', function(e) {
+        $(this).siblings('.filterColumn').val('');
+        filterByName(e, parent);
+        
     });
     
     $(document).on('click','#selectAll', function(e) {
@@ -211,14 +203,26 @@ $(document).ready(function(){
         callAjax(obj, url, callbackName);
     });
         
-    $('#clearFilter').click(function (){
-        $('.filterColumn').val('');
-    });
+    
 });
+
+function renderTable(success){
+    var callbackName = "categoryTableInit";
+    if (success == 1){
+        callbackName = "categoryTable";
+    }
+    var obj = new Object();
+    obj.parent = parent;
+    obj.offset = 0;
+    obj.filter = "";
+    obj.filterName = "";
+    obj.deleteItems = "";
+    callAjax(obj, url, callbackName);
+}
 function callback(name, data) {
     if (name == 'categoryTableInit'){
         var content = new EJS({url: basePath+'template/categoryTable.ejs'}).render(data);
-        $("#categoryTable").html(content);
+        $("#category-table").html(content);
         
         $('#page-selection').bootpag({
             total: Math.ceil(data.totalCount / limit),
@@ -238,7 +242,7 @@ function callback(name, data) {
         });
     } else if (name == 'categoryTable') {
         var content = new EJS({url: basePath+'template/categoryTable.ejs'}).render(data);
-        $("#categoryTable").html(content); 
+        $("#category-table").html(content); 
         $('#alert-updated').removeClass("hidden");
         $('#alert-updated').fadeIn(500);
         $('#alert-updated').fadeOut(3000);
@@ -263,13 +267,30 @@ function callback(name, data) {
         $('#ajax-message').removeClass("hidden");
         $('#ajax-message').fadeIn(500);
         $('#ajax-message').fadeOut(3000);
+    } else if (name == 'updateSortPosition') {
+        //alert(JSON.stringify(data));
+        renderTable(1);
     }
-
 }
 
 var requestDelay;
 var proname;
-function filterByName(e, filterName, thisProname, proname){
+
+function filterByName(e, parent){
+
+    var thisProname = "";
+    var filterName = "";
+    var parentId = parent;
+    var total = $('.filterColumn').length;
+    $('.filterColumn').each(function(index){
+        thisProname += $(this).val();
+        filterName +=  $(this).attr('id');
+        if (index != total - 1){
+            thisProname += "|";
+            filterName += "|";
+        }
+    });
+
     if(e.which == 13 || thisProname == proname) {
           return;
     }
@@ -281,6 +302,7 @@ function filterByName(e, filterName, thisProname, proname){
 
    requestDelay = window.setTimeout(function() {
         var obj = new Object();
+        obj.parent = parentId;
         obj.offset = offset;
         obj.filter = proname;
         obj.filterName = filterName;
@@ -289,5 +311,9 @@ function filterByName(e, filterName, thisProname, proname){
         callAjax(obj, url, callbackName)
    }, 500);
 }
+
+
+
+
 </script>
   

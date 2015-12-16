@@ -59,7 +59,7 @@ $inputAttributes = 'class="form-control"';
             </div><!--end .card-body -->
             <div class="row">
                 <div class="col-lg-6 text-left">
-                    <a href="<?php echo site_url('category') ?>" class="btn btn-primary ink-reaction">Cancel</a>
+                    <a href="<?php echo site_url('category/') ?>" class="btn btn-primary ink-reaction">Cancel</a>
                 </div>
                 <div class="col-lg-6 text-right">
                     <button type="submit" class="btn btn-primary ink-reaction"><?php echo (isset($category->id)?"Update category":"Create category"); ?></button>

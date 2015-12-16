@@ -22,7 +22,7 @@
     background-color: #eee;
     padding: 0 5px;
     color: #aaa;
-    width: 43px;
+    width: 80px;
     text-shadow: #fff 1px 1px;
     -webkit-border-radius: 3px;
     border-radius: 3px;
@@ -50,4 +50,26 @@
 #span_img {
     display: table-cell;
     vertical-align: middle;
+}
+.filterColumn {
+    width: 95%;
+    border-style: solid;
+    border-color: #fff;
+}
+.input-outer {
+    border: 1px #e7e7e7 solid;
+    background-color: #fff;
+    width: 100%;
+}
+.filter-close {
+    right: 0px;
+}
+
+.row-actions {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding-left: 10px;
+}
+.breadcrumb {
+    list-style: none;
 }

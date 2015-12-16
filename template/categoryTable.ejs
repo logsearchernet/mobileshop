@@ -7,7 +7,7 @@
                 </label>
             </div>
         </td>
-        <td class="width-2"><%=data[i].id%></td>
+        <td><%=data[i].id%></td>
         <td>
             <div><%=data[i].name%></div>
             <div class="row-actions">
@@ -20,7 +20,7 @@
         <td class="pointer dragHandle center">
             <div class="dragGroup">
                 <div class="positions">
-                    <%=data[i].position%>
+                    <button type="button" class="btn btn-link move-row ui-sortable-handle" categoryid="<%=data[i].id%>" value="<%=data[i].position%>"><i class="fa fa-arrows fa-lg"></i></button> <%=data[i].position%>
                 </div>
             </div>
         </td>
@@ -33,6 +33,8 @@
 %>
 <script>
 $(document).ready(function(){
+    
+    doSortTableRow();
     $('.row-actions').hide();
     $("[name='displayed']").bootstrapSwitch();
     $("[name='displayed']").on('switchChange.bootstrapSwitch', function(event, state) {
@@ -52,4 +54,35 @@ $(document).ready(function(){
     });
 
 });
+
+function doSortTableRow(){
+    $("#category-table").sortable({
+    	handle:'button.move-row',
+        helper: fixWidthHelper,
+    	cancel: '',
+    	update: function(event, ui) {
+            var newProps = new Array(0);
+            $('.iedit').each(function(i) { 
+                var sortNum = $(this).find('button.move-row').val();
+                var categoryid = $(this).find('button.move-row').attr('categoryid');
+
+                var obj = new Object();
+                obj.categoryid = categoryid;
+                obj.sortNum = sortNum;
+                
+                newProps.push(obj);
+            });
+            //alert(JSON.stringify(newProps));
+            var callbackName = "updateSortPosition";
+            callAjax(newProps, updateSortPosition, callbackName);
+    	}
+    });
+}
+
+function fixWidthHelper(e, ui) {
+    ui.children().each(function() {
+        $(this).width($(this).width());
+    });
+    return ui;
+}
 </script>

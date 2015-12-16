@@ -24,7 +24,7 @@ function callAjax(obj, url, callbackName) {
         dataType: "json",
         timeout: timeoutSetting,
         success: function(data){
-        	callback(callbackName, data);
+            callback(callbackName, data);
         },
         failure: function(errMsg) {
             alert("Falure:"+errMsg);

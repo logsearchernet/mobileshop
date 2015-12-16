@@ -13,7 +13,7 @@ class Category extends MY_Controller {
     public function index($parent = 0) {
         $success = $this->input->get('success');
         $this->load->model('Category_Entity');
-        $where = NULL;
+        $where = "parent_category = ". $parent;
         $count = $this->Category_Entity->count_by($where);
         
         $this->data = array('count' => $count,
@@ -44,6 +44,28 @@ class Category extends MY_Controller {
         echo json_encode($category);
     }
     
+    public function ajax_category_sort_position(){
+        $request_body = file_get_contents('php://input');
+        $data = json_decode($request_body);
+        $this->output->set_content_type('application/json');
+        
+        $this->load->model('Category_Entity');
+        $length = count($data);
+        for ($i = 0; $i < $length; $i++) {
+            $cat = $data[$i];
+            $id = $cat->categoryid;
+            $sortNum = $cat->sortNum;
+            
+            $category = new Category_Entity();
+            $category->load($id);
+            $category->position = $i + 1;
+            
+            $category->save();
+        }
+        $success = 1;
+        echo json_encode($success);
+    }
+    
     public function ajax_category_table(){
         $request_body = file_get_contents('php://input');
         $data = json_decode($request_body);
@@ -61,7 +83,7 @@ class Category extends MY_Controller {
         $this->load->model('Category_Entity');
         $where = "parent_category = ". $parent;
         if (isset($filterName) && !empty($filterName) && strlen($filterName) > 0) {
-            $where = "";
+            $where .= " AND ";
             $length = count($filterNameArr);
             
             for ($i = 0; $i < $length; $i++) {
@@ -123,10 +145,24 @@ class Category extends MY_Controller {
         $where = "parent_category = ". $parent;
         $count = $this->Category_Entity->count_by($where);
         
+        $categoryNames = array();
+        $parentTemp = $parent;
+        $i = 0;
+        do {
+            $category = new Category_Entity();
+            $category->load($parentTemp);
+            $categoryNames[$category->id] = $category->name;
+            $i++;
+            $parentTemp = $category->parent_category;
+        } while ($parentTemp != 0);
+        
+        $reversed = array_reverse($categoryNames, true);
+        
         $this->data = array('count' => $count,
                             'limit' => $this->limit,
                             'success' => $success,
-                            'parent' => $parent);
+                            'parent' => $parent,
+                            'categoryNames' => $reversed);
         
         $this->content = 'category';
         $this->layout();
@@ -141,7 +177,7 @@ class Category extends MY_Controller {
         $category = $this->save_category($this);
         $this->data = array('category' => $category);
         
-        redirect('/category/?success=1', 'refresh');
+        redirect('/category/index/'. $category->parent_category .'?success=1', 'refresh');
     }
     
     /*public function category_remove($id = NULL) {
@@ -165,11 +201,13 @@ class Category extends MY_Controller {
         date_default_timezone_set($this->geoCity); 
         $category = new Category_Entity();
         $id  = $this->input->post('id');
+        $parentId  = $this->input->post('parent_category');
         if (!empty($id)) {
             $category->load($id);
         } else {
             $category->created_date = date('Y-m-d h:i:sa', now());
-            $maxPosition = $category->max('position');
+            $where = "parent_category =". $parentId;
+            $maxPosition = $category->max('position', $where);
             $category->position = intval($maxPosition) + 1;
         }
         

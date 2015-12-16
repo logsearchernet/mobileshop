@@ -139,9 +139,13 @@ class MY_Model extends CI_Model {
         return $ret_val;
     }
     
-    public function max($col) {
+    public function max($col = NULL, $where = NULL) {
         $maxid = 0;
-        $row = $this->db->query('SELECT MAX('.$col.') AS `maxid` FROM '.$this::DB_TABLE)->row();
+        $sql = 'SELECT MAX('.$col.') AS `maxid` FROM '.$this::DB_TABLE;
+        if (isset($where) && !empty($where)){
+            $sql .= ' WHERE '.$where;
+        }
+        $row = $this->db->query($sql)->row();
         if ($row) {
             $maxid = $row->maxid; 
         }

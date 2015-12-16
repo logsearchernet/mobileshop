@@ -13,6 +13,7 @@
 		<!-- BEGIN STYLESHEETS -->
 <!--		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,300,400,600,700,800' rel='stylesheet' type='text/css'/>-->
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('/css/theme-default/bootstrap.css'); ?>" />
+                <link type="text/css" rel="stylesheet" href="<?php echo site_url('/css/theme-default/libs/bootstrap-tagsinput/bootstrap-tagsinput.css'); ?>" />
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/theme-default/materialadmin.css'); ?>" />
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/theme-default/font-awesome.min.css'); ?>" /> <!--Font Awesome Icon Font-->
 		<link type="text/css" rel="stylesheet" href="<?php echo site_url('css/theme-default/material-design-iconic-font.min.css'); ?>" /> <!--Material Design Iconic Font-->
@@ -35,6 +36,7 @@
                 <script src="<?php echo site_url('js/libs/jquery/jquery-1.11.2.min.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/jquery/jquery-migrate-1.2.1.min.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/bootstrap/bootstrap.min.js'); ?>"></script>
+                <script src="<?php echo site_url('js/libs/bootstrap-tagsinput/bootstrap-tagsinput.min.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/spin.js/spin.min.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/autosize/jquery.autosize.min.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/moment/moment.min.js'); ?>"></script>
@@ -60,6 +62,8 @@
                 <script src="<?php echo site_url('js/libs/summernote/summernote.min.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/bootstrap-switch/bootstrap-switch.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/bootpag/jquery.bootpag.min.js'); ?>"></script>
+                <script src="<?php echo site_url('js/libs/jquery-ui/jquery-ui.min.js'); ?>"></script>
+                
                 <script src="<?php echo site_url('js/ejs_production.js'); ?>"></script>
                 <script src="<?php echo site_url('js/main.js'); ?>"></script>
 
