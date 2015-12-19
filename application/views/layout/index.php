@@ -22,6 +22,8 @@
                 <link type="text/css" rel="stylesheet" href="<?php echo site_url('css/theme-default/libs/morris/morris.core.css'); ?>">
                 <link type="text/css" rel="stylesheet" href="<?php echo site_url('css/theme-default/libs/summernote/summernote.css'); ?>">
                 <link type="text/css" rel="stylesheet" href="<?php echo site_url('css/theme-default/libs/bootstrap-switch/bootstrap-switch.css'); ?>">
+                <link type="text/css" rel="stylesheet" href="<?php echo site_url('css/theme-default/libs/bootstrap-colorpicker/bootstrap-colorpicker.css'); ?>">
+                <link type="text/css" rel="stylesheet" href="<?php echo site_url('css/animate.css'); ?>">
                 <link type="text/css" rel="stylesheet" href="<?php echo site_url('css/main.css'); ?>">
                 
                 <link type="text/css" rel="stylesheet" href="<?php echo site_url('css/theme-default/libs/DataTables/jquery.dataTables.css'); ?>">
@@ -62,6 +64,7 @@
                 <script src="<?php echo site_url('js/libs/summernote/summernote.min.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/bootstrap-switch/bootstrap-switch.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/bootpag/jquery.bootpag.min.js'); ?>"></script>
+                <script src="<?php echo site_url('js/libs/bootstrap-colorpicker/bootstrap-colorpicker.js'); ?>"></script>
                 <script src="<?php echo site_url('js/libs/jquery-ui/jquery-ui.min.js'); ?>"></script>
                 
                 <script src="<?php echo site_url('js/ejs_production.js'); ?>"></script>
@@ -110,7 +113,7 @@
             
             <div id="busy_indicator" align="center" style="visibility: hidden;">
                 <span id="span_img">
-                    <img id="load_img" align="middle" height="35" width="43" alt="busy indicator" src="<?php echo site_url('img/busy.gif')?>"/>
+                    <img id="load_img" align="middle" height="35" width="43" alt="busy indicator" src="<?php echo site_url('img/gears.gif')?>"/>
                 </span>
             </div>    
 	</body>

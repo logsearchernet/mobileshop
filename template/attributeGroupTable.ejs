@@ -1,0 +1,72 @@
+
+<% for(var i=0; i<data.length; i++) {%>
+    <tr class="iedit">
+        <td class="row-selector text-center">
+            <div class="checkbox checkbox-inline checkbox-styled">
+                <label>
+                    <input type="checkbox" class="checkItem" value="<%=data[i].id%>"><span></span>
+                </label>
+            </div>
+        </td>
+        <td><%=data[i].id%></td>
+        <td>
+            <div><%=data[i].name%></div>
+            <div class="row-actions">
+                <span class="edit"><i class="fa fa-edit"></i> <a href="<%=basePath%>product_attribute_group/attribute_group_form/<%=data[i].id%>" title="Edit this item">Edit</a> | </span>
+                <span class="trash"><i class="fa fa-trash-o"></i> <a class="submitdelete" title="Move this item to the Trash" href="#" id="<%=data[i].id%>">Trash</a> | </span>
+                <span class="view"><i class="fa fa-eye"></i> <a href="<%=basePath%>product_attribute_child/index/<%=data[i].id%>" title="View Child" rel="permalink">View Child</a></span>
+            </div>
+        </td>
+        <td class="pointer dragHandle center">
+            <div class="dragGroup">
+                    <button type="button" class="btn btn-link move-row ui-sortable-handle" attributegroupid="<%=data[i].id%>" value="<%=data[i].position%>">
+                    <i class="fa fa-arrows fa-lg"></i></button>
+            </div>
+        </td>
+    </tr>
+    <%
+}
+%>
+<script>
+$(document).ready(function(){
+    
+    doSortTableRow();
+    $('.row-actions').hide();
+
+    $(".iedit").mouseover(function(){
+        $('.row-actions').hide();
+        $(this).find('.row-actions').show();
+    });
+
+});
+
+function doSortTableRow(){
+    $("#attribute-table").sortable({
+    	handle:'button.move-row',
+        helper: fixWidthHelper,
+    	cancel: '',
+    	update: function(event, ui) {
+            var newProps = new Array(0);
+            $('.iedit').each(function(i) { 
+                var sortNum = $(this).find('button.move-row').val();
+                var attributegroupid = $(this).find('button.move-row').attr('attributegroupid');
+
+                var obj = new Object();
+                obj.id = attributegroupid;
+                obj.sortNum = sortNum;
+                
+                newProps.push(obj);
+            });
+            var callbackName = "updateSortPosition";
+            callAjax(newProps, updateSortPosition, callbackName);
+    	}
+    });
+}
+
+function fixWidthHelper(e, ui) {
+    ui.children().each(function() {
+        $(this).width($(this).width());
+    });
+    return ui;
+}
+</script>

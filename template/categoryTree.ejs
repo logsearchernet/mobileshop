@@ -3,8 +3,8 @@
     for(var i=0; i<data.length; i++) {
     %>
     <li class="tree-folder">
-        <span class="<%=(data[i].lastChild)?'':'tree-folder-name'%>">
-        <input type="radio" name="id_parent" value="<%=data[i].id%>"/>
+        <span class="<%=(data[i].lastChild)?'':'tree-folder-name'%>" catid="<%=data[i].id%>">
+        <input type="radio" name="parent_category" value="<%=data[i].id%>" <%=(data[i].checked)?'checked="checked"':'' %>/> 
         
         <i class="<%=(data[i].lastChild)?'fa  fa-chevron-right':'fa fa-folder'%>"></i>
          <label class="tree-toggler"><%=data[i].name%></label></span>

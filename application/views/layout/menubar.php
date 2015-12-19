@@ -69,7 +69,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="<?php echo site_url('product_attribute')?>">
+                            <a href="<?php echo site_url('product_attribute_group')?>">
                                 <span class="title">Product Attributes</span>
                             </a>
                         </li>

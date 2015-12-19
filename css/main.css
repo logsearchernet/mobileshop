@@ -22,12 +22,20 @@
     background-color: #eee;
     padding: 0 5px;
     color: #aaa;
-    width: 80px;
     text-shadow: #fff 1px 1px;
     -webkit-border-radius: 3px;
     border-radius: 3px;
     -webkit-box-shadow: rgba(0,0,0,0.2) 0 1px 3px inset;
     box-shadow: rgba(0,0,0,0.2) 0 1px 3px inset;
+}
+
+#alert-status-updated, #alert-updated, #alert-fail{
+    z-index: 100;
+    position:fixed;
+    top: 50%;
+    left: 40%;
+    margin-top: -50px;
+    margin-left: -50px;
 }
 
 #busy_indicator {
@@ -51,8 +59,11 @@
     display: table-cell;
     vertical-align: middle;
 }
+.filter-clear{
+    width: 10px;
+}
 .filterColumn {
-    width: 95%;
+    width: 90%;
     border-style: solid;
     border-color: #fff;
 }
@@ -73,3 +84,7 @@
 .breadcrumb {
     list-style: none;
 }
+
+.tree {
+    list-style: none;
+} 

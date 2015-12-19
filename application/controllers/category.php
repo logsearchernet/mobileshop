@@ -24,6 +24,73 @@ class Category extends MY_Controller {
         $this->layout();
     }
     
+    public function ajax_expandselected_tree(){
+        $request_body = file_get_contents('php://input');
+        $data = json_decode($request_body);
+        $this->output->set_content_type('application/json');
+        
+        $this->load->model('Category_Entity');
+        $list = array();
+        $i = 0;
+        $parentTemp = $data->id;
+        do {
+            $list[$i] = intval($parentTemp);
+            $category = new Category_Entity();
+            $category->load($parentTemp);
+            $parentTemp = $category->parent_category;
+            $i++;
+        } while ($parentTemp != 0);
+        
+        
+        $list[$i++] = 0;
+        $reversed = array_reverse($list);
+        echo json_encode($reversed);
+    }
+    
+    public function ajax_tree(){
+        $request_body = file_get_contents('php://input');
+        $data = json_decode($request_body);
+        $this->output->set_content_type('application/json');
+        
+        $cats = NULL;
+        $id_parent = intval($data->id);
+        $current_cat_id = $data->current_cat_id;
+        $parent_category = $data->parent_category;
+        $this->load->model('Category_Entity');
+        if (isset($id_parent)) {
+            $where = "parent_category = ". $id_parent;
+            $cats = $this->Category_Entity->getByWhere($where);
+        }
+        
+        $current_cat = new Category_Entity();
+        $current_cat->load($current_cat_id);
+        
+        $categories = array();
+        $categories2 = array();
+        foreach ($cats as $cat) {
+            $isLastChild = FALSE;
+            $checked = ($cat->id == $current_cat->parent_category)?TRUE:FALSE;
+            $where2 = "parent_category = ". $cat->id;
+            $cats2 = $this->Category_Entity->getByWhere($where2);
+            if (empty($cats2)) {
+                $isLastChild = TRUE;
+            }
+            $categories[] = array(
+                "name" => $cat->name,
+                "parent_category" => $cat->parent_category,
+                "id" => $cat->id,
+                "lastChild" => $isLastChild,
+                "checked" => $checked,
+            );
+        }
+        $data = new stdClass();
+        $data->data = $categories;
+        
+        $data = new stdClass();
+        $data->data = $categories;
+        echo json_encode($data);
+    }
+    
     public function ajax_category_displayed(){
         $request_body = file_get_contents('php://input');
         $data = json_decode($request_body);
@@ -114,7 +181,7 @@ class Category extends MY_Controller {
         echo json_encode($categories);
     }
     
-    public function category_form($id = NULL) {
+    public function category_form($id = 0) {
         $this->load->helper('form');
         
         $this->load->model('Category_Entity');
@@ -134,7 +201,8 @@ class Category extends MY_Controller {
         }
         
         $this->data = array('category' => $category,
-                            'options' => $options);
+                            'options' => $options,
+                            'id' => $id);
         $this->content = 'category_form';
         $this->layout();
     }
@@ -202,12 +270,12 @@ class Category extends MY_Controller {
         $category = new Category_Entity();
         $id  = $this->input->post('id');
         $parentId  = $this->input->post('parent_category');
+        $where = "parent_category =". $parentId;
+        $maxPosition = $category->max('position', $where);
         if (!empty($id)) {
             $category->load($id);
         } else {
             $category->created_date = date('Y-m-d h:i:sa', now());
-            $where = "parent_category =". $parentId;
-            $maxPosition = $category->max('position', $where);
             $category->position = intval($maxPosition) + 1;
         }
         

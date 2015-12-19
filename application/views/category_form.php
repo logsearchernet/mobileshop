@@ -32,10 +32,16 @@ $inputAttributes = 'class="form-control"';
                 <div class="form-group">
                     <?php echo form_label('Parent Category', 'parent_category', $labelAttributes); ?>
                     <div class=" col-sm-10">
-                        <?php 
-                        $attr = 'class="form-control"';
-                        echo form_dropdown('parent_category', $options, $category->parent_category, $attr);
-                        ?>
+                        <ul id="categories-tree" class="tree">
+                            <li class="tree-folder">
+                                <span class="tree-folder-name tree-selected" catid="">
+                                    <input type="radio" name="parent_category" value="0" checked="checked">
+                                    <i class="fa fa-folder"></i>
+                                    <label class="tree-toggler">Home</label>
+                                </span>
+
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
@@ -69,7 +75,16 @@ $inputAttributes = 'class="form-control"';
     <?php echo form_close(); ?>
 </div>
 <script>
+var basePath = "<?php echo site_url('')?>";
+var url = basePath+"category/ajax_tree";
+var urlExpandAll = basePath+"category/ajax_expandselected_tree";
+var expandselectedTree;
+var currentArrIndex = 0;
+var current_cat_id = <?php echo $id?>;
+
 $(document).ready(function(){
+    initLoad(current_cat_id);
+    
     $("[name='displayed']").bootstrapSwitch();
     
     $("[name='description']").summernote({
@@ -78,5 +93,75 @@ $(document).ready(function(){
         maxHeight: null,             // set maximum height of editor
         focus: true                  // set focus to editable area after initializing summernote
     });
+    
+    $(document).on('click','.tree-folder-name', function(e) {
+        openFolder(e, $(this));
+    });
 });
+
+function initLoad(id){
+    var obj = new Object();
+    obj.id = id; 
+    callbackName = "category-expandselected-tree";
+    callAjax(obj, urlExpandAll, callbackName);
+    
+}
+
+function openFolderWithId(e, id){
+    
+    var thisOne = $(".tree-folder-name[catid='"+id+"']");
+    var id_parent = thisOne.find('input[name="parent_category"]').val();
+    if (id_parent == undefined){
+        return;
+    }
+    thisOne.siblings('.tree').remove();
+    var id = thisOne.attr('catid');
+    var obj = new Object();
+    obj.parent_category = id_parent;
+    obj.id = id;  
+    obj.current_cat_id = current_cat_id;
+
+    if (id == current_cat_id){
+        return;
+    }
+    callbackName = "category-tree";
+    callAjaxWithThis(obj, url, callbackName, thisOne);
+}
+
+function openFolder(e, thisOne){
+    if($(e.target).is(':input')){
+        return;
+    } 
+    
+    if (thisOne.siblings('.tree').is(':visible')){
+        thisOne.children('i').toggleClass('fa-folder-open fa-folder');
+        thisOne.siblings('.tree');
+        thisOne.siblings('.tree').hide('fast');
+    } else {
+        thisOne.siblings('.tree').remove();
+        var id_parent = thisOne.find('input[name="parent_category"]').val();
+        var id = thisOne.attr('catid');
+        var obj = new Object();
+        obj.parent_category = id_parent;
+        obj.id = id;    
+        obj.current_cat_id = current_cat_id;
+
+        callbackName = "category-tree";
+        callAjaxWithThis(obj, url, callbackName, thisOne);
+    }
+}
+
+function callback(name, data, thisOne) {
+    if (name == 'category-tree'){   
+        //alert(JSON.stringify(data));
+        var content = new EJS({url: basePath+'template/categoryTree.ejs'}).render(data);
+        thisOne.parent().append(content);
+        thisOne.find('.fa').toggleClass('fa-folder fa-folder-open');
+        openFolderWithId(this.event, expandselectedTree[++currentArrIndex]);
+    } else if (name = 'category-expandselected-tree'){
+        data.current_cat_id = current_cat_id;
+        expandselectedTree = data;
+        openFolderWithId(this.event, "");
+    }
+}
 </script>

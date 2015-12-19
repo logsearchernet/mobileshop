@@ -26,7 +26,7 @@ class Sample_Demo extends MY_Controller {
         $this->output->set_content_type('application/json');
         
         $cats = NULL;
-        $id_parent = intval($data->id_parent);
+        $id_parent = intval($data->parent_category);
         $this->load->model('Category_Entity');
         if (isset($id_parent)) {
             $where = "parent_category = ". $id_parent;

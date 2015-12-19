@@ -1,5 +1,3 @@
-
-    
 <div class="row">
     <div class="col-lg-6">
 
@@ -8,7 +6,7 @@
                 <a href="<?php echo site_url('product') ?>">Catalog</a>				
             </li>
             <li class="breadcrumb-current">
-                <a href="<?php echo site_url('category') ?>">Categories</a>
+                <a href="<?php echo site_url('product_attribute_group') ?>">Product Attributes</a>
             </li>
         </ul>
     </div>
@@ -17,11 +15,11 @@
             <a href="#" class="toolbar_btn dropdown-toolbar navbar-toggle" data-toggle="collapse" data-target="#toolbar-nav"><i class="process-icon-dropdown"></i><div>Menu</div></a>
             <ul id="toolbar-nav" class="nav nav-pills pull-right collapse navbar-collapse">
                 <li>
-                    <a class="toolbar_btn  pointer text-center" href="<?php echo site_url('category/category_form') ?>">
+                    <a class="toolbar_btn  pointer text-center" href="<?php echo site_url('product_attribute_child/attribute_child_form/0/'. $parentId) ?>">
                         <i class="fa fa-plus-circle fa-2x"></i>
-                        <div>Add new category</div>
+                        <div>Add new value</div>
                     </a>
-                </li>
+                </li>   
             </ul>
         </div>
     </div>
@@ -29,61 +27,36 @@
 </div>
 
 
-<ul class="breadcrumb">
-    <li>
-        <a href="<?php echo site_url('/category/category_view/');?>"><i class="fa fa-home"></i>Home</a>
-    </li>
-    <?php if (isset($categoryNames)): ?>
-    <?php foreach ($categoryNames as $id => $name):?>
-    <li>
-        <a href="<?php echo site_url('/category/category_view/'. $id); ?>"><?php echo $name;?></a>
-    </li>
-    <?php endforeach;?>
-    <?php endif; ?>
-</ul>
+
 
 <div class="card card-underline">
-    <div class="card-head"><header>Categories<sup class="badge"><?php echo $count?></sup></header></div>
+    <div class="card-head"><header>Product Attribute Values<sup class="badge"><?php echo $count?></sup></header></div>
     <form class="form">
         <table class="table table-hover">
         <thead>
             <tr>
                 <th style="width: 10%;">&nbsp;</th>
                 <th style="width: 10%;">#</th>
-                <th style="width: 30%;">Name</th>
-                <th style="width: 30%;">Description</th>
+                <th style="width: 30%;">Value</th>
+                <th style="width: 40%;">Color</th>
                 <th style="width: 10%;">Position</th>
-                <th style="width: 10%;">Displayed</th>
             </tr>
             <tr class="style-default-light">
                 <th></th>
                 <th></th>
                 <th>
                     <div class="row input-outer"> 
-                        <input type="text" class="filterColumn" id="name" autocomplete="off">
-                        <i class="fa fa-close filter-clear"></i>
-                    </div>
-                </th>
-                <th>
-                    <div class="row input-outer"> 
-                        <input type="text" class="filterColumn" id="description" autocomplete="off">
+                        <input type="text" class="filterColumn" id="value" autocomplete="off">
                         <i class="fa fa-close filter-clear"></i>
                     </div>
                 </th>
                 <th>
                 </th>
                 <th>
-                    <div class="row input-outer">
-                    <select class="form-control filterColumn" id="displayed">
-                        <option value="">---  All  ---</option>
-                        <option value="1"> ON </option>
-                        <option value="0"> OFF </option>
-                    </select>  
-                    </div>
                 </th>
             </tr>
         </thead>
-        <tbody id="category-table">
+        <tbody id="attribute-table">
             <!-- LOAD AJAX With CONTENT -->
         </tbody>
     </table>
@@ -118,14 +91,15 @@
 <div id="alert-fail" class="alert alert-danger hidden">
     <i class="fa fa-check-circle"> </i> Failed update
 </div>
+
 <script>
 var basePath = "<?php echo site_url('')?>";
-var url = basePath+"category/ajax_category_table";
-var updateSortPosition = basePath+"category/ajax_category_sort_position";
+var url = basePath+"product_attribute_child/ajax_attribute_child_table";
+var updateSortPosition = basePath+"product_attribute_child/ajax_attribute_child_sort_position";
 var offset = 0;
 var totalCount = <?php echo $count?>;
 var limit = <?php echo $limit?>;
-var parent = <?php echo $parent?>;
+var parent = <?php echo $parentId?>;
 $(document).ready(function(){
     
     $(window).load(function(){
@@ -177,7 +151,7 @@ $(document).ready(function(){
         obj.filter = "";
         obj.filterName = "";
         obj.deleteItems = deleteItems;
-        var callbackName = "categoryTable";
+        var callbackName = "attributeTable";
         callAjax(obj, url, callbackName);
     });
     
@@ -202,17 +176,15 @@ $(document).ready(function(){
         obj.filter = "";
         obj.filterName = "";
         obj.deleteItems = deleteItems;
-        var callbackName = "categoryTable";
+        var callbackName = "attributeTable";
         callAjax(obj, url, callbackName);
     });
-        
-    
 });
 
 function renderTable(success){
-    var callbackName = "categoryTableInit";
+    var callbackName = "attributeChildTableInit";
     if (success == 1){
-        callbackName = "categoryTable";
+        callbackName = "attributeChildTable";
     }
     var obj = new Object();
     obj.parent = parent;
@@ -222,12 +194,11 @@ function renderTable(success){
     obj.deleteItems = "";
     callAjax(obj, url, callbackName);
 }
+
 function callback(name, data) {
-    if (name == 'categoryTableInit'){
-        var content = new EJS({url: basePath+'template/categoryTable.ejs'}).render(data);
-        $("#category-table").html(content);
-         
-           
+    if (name == 'attributeChildTableInit'){
+        var content = new EJS({url: basePath+'template/attributeChildTable.ejs'}).render(data);
+        $("#attribute-table").html(content);
         
         $('#page-selection').bootpag({
             total: Math.ceil(data.totalCount / limit),
@@ -242,12 +213,12 @@ function callback(name, data) {
             obj.filter = "";
             obj.filterName = "";
             obj.deleteItems = "";
-            var callbackName = "categoryTableInit";
+            var callbackName = "attributeTableInit";
             callAjax(obj, url, callbackName);
         });
-    } else if (name == 'categoryTable') {
-        var content = new EJS({url: basePath+'template/categoryTable.ejs'}).render(data);
-        $("#category-table").html(content); 
+    } else if (name == 'attributeChildTable'){
+        var content = new EJS({url: basePath+'template/attributeChildTable.ejs'}).render(data);
+        $("#attribute-table").html(content); 
         $('#alert-updated').removeClass("hidden");
         $('#alert-updated').fadeIn(500);
         $('#alert-updated').fadeOut(3000);
@@ -265,60 +236,35 @@ function callback(name, data) {
             obj.filter = "";
             obj.filterName = "";
             obj.deleteItems = "";
-            var callbackName = "categoryTableInit";
+            var callbackName = "attributeTableInit";
             callAjax(obj, url, callbackName);
         });
-    } else if (name == 'categoryDisplay'){
-        $('#alert-status-updated').removeClass("hidden");
-        $('#alert-status-updated').fadeIn(500);
-        $('#alert-status-updated').fadeOut(3000);
-    } else if (name == 'updateSortPosition') {
-        //alert(JSON.stringify(data));
+    }else if (name == 'updateSortPosition') {
         renderTable(1);
+    } else if (name == 'attributeTable'){
+        var content = new EJS({url: basePath+'template/attributeChildTable.ejs'}).render(data);
+        $("#attribute-table").html(content); 
+        $('#alert-updated').removeClass("hidden");
+        $('#alert-updated').fadeIn(500);
+        $('#alert-updated').fadeOut(3000);
+        $('.badge').html(data.data.length);
+        
+        $('#page-selection').bootpag({
+            total: Math.ceil(data.totalCount / limit),
+            maxVisible: 5,
+            page: (offset / limit) + 1
+        }).on("page", function(event,num){
+            $('#alert-updated').hide();
+            var obj = new Object();
+            offset = (num - 1) * limit;
+            obj.parent = parent;
+            obj.offset = offset;
+            obj.filter = "";
+            obj.filterName = "";
+            obj.deleteItems = "";
+            var callbackName = "attributeChildTableInit";
+            callAjax(obj, url, callbackName);
+        });
     }
 }
-
-var requestDelay;
-var proname;
-
-function filterByName(e, parent){
-
-    var thisProname = "";
-    var filterName = "";
-    var parentId = parent;
-    var total = $('.filterColumn').length;
-    $('.filterColumn').each(function(index){
-        thisProname += $(this).val();
-        filterName +=  $(this).attr('id');
-        if (index != total - 1){
-            thisProname += "|";
-            filterName += "|";
-        }
-    });
-
-    if(e.which == 13 || thisProname == proname) {
-          return;
-    }
-
-   proname = thisProname;
-
-   // postpone the submit another 300 ms upon every new character
-   window.clearTimeout(requestDelay);  
-
-   requestDelay = window.setTimeout(function() {
-        var obj = new Object();
-        obj.parent = parentId;
-        obj.offset = offset;
-        obj.filter = proname;
-        obj.filterName = filterName;
-        obj.deleteItems = "";
-        var callbackName = "categoryTable";
-        callAjax(obj, url, callbackName)
-   }, 500);
-}
-
-
-
-
 </script>
-  

@@ -21,9 +21,9 @@ $(document).ready(function(){
             $(this).siblings('.tree').hide('fast');
         } else {
             $(this).siblings('.tree').remove();
-            var id_parent = $(this).find('input[name="id_parent"]').val();
+            var id_parent = $(this).find('input[name="parent_category"]').val();
             var obj = new Object();
-            obj.id_parent = id_parent;
+            obj.parent_category = id_parent;
 
             var url = basePath+"sample_demo/ajax_tree";
             callbackName = "category-tree";
@@ -44,12 +44,11 @@ function callback(name, data) {
 <ul id="categories-tree" class="tree">
     <li class="tree-folder">
         <span class="tree-folder-name tree-selected">
-            <input type="radio" name="id_parent" value="0">
+            <input type="radio" name="parent_category" value="0">
             <i class="fa fa-folder"></i>
             <label class="tree-toggler">Home</label>
         </span>
         
     </li>
-
 </ul>
 

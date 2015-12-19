@@ -1,3 +1,4 @@
+
 <% for(var i=0; i<data.length; i++) {%>
     <tr class="iedit">
         <td class="row-selector text-center">
@@ -9,22 +10,20 @@
         </td>
         <td><%=data[i].id%></td>
         <td>
-            <div><%=data[i].name%></div>
+            <div><%=data[i].value%></div>
             <div class="row-actions">
-                <span class="edit"><i class="fa fa-edit"></i> <a href="<%=basePath%>category/category_form/<%=data[i].id%>" title="Edit this item">Edit</a> | </span>
-                <span class="trash"><i class="fa fa-trash-o"></i> <a class="submitdelete" title="Move this item to the Trash" href="#" id="<%=data[i].id%>">Trash</a> | </span>
-                <span class="view"><i class="fa fa-eye"></i> <a href="<%=basePath%>category/category_view/<%=data[i].id%>" title="View Child" rel="permalink">View Child</a></span>
-            </div>
-        </td>
-        <td><%=data[i].description%></td>
-        <td class="pointer dragHandle center">
-            <div class="dragGroup">
-                    <button type="button" class="btn btn-link move-row ui-sortable-handle" categoryid="<%=data[i].id%>" value="<%=data[i].position%>">
-                    <i class="fa fa-arrows fa-lg"></i></button>
+                <span class="edit"><i class="fa fa-edit"></i> <a href="<%=basePath%>product_attribute_child/attribute_child_form/<%=data[i].id%> " title="Edit this item">Edit</a> | </span>
+                <span class="trash"><i class="fa fa-trash-o"></i> <a class="submitdelete" title="Move this item to the Trash" href="#" id="<%=data[i].id%>">Trash</a> </span>
             </div>
         </td>
         <td>
-            <input id="switch-state" type="checkbox" name="displayed" categoryid="<%=data[i].id%>" <%=(data[i].displayed == '1')?'checked="checked"':''%>/>
+            <div><%=data[i].color%></div>
+        </td>
+        <td class="pointer dragHandle center">
+            <div class="dragGroup">
+                    <button type="button" class="btn btn-link move-row ui-sortable-handle" attributechildid="<%=data[i].id%>" value="<%=data[i].position%>">
+                    <i class="fa fa-arrows fa-lg"></i></button>
+            </div>
         </td>
     </tr>
     <%
@@ -35,17 +34,6 @@ $(document).ready(function(){
     
     doSortTableRow();
     $('.row-actions').hide();
-    $("[name='displayed']").bootstrapSwitch();
-    $("[name='displayed']").on('switchChange.bootstrapSwitch', function(event, state) {
-        var categoryid = $(this).attr("categoryid");
-        var displayed = ($(this).attr("checked")=='checked')?1:0;
-        var url = basePath+"category/ajax_category_displayed";
-        var callbackName = "categoryDisplay";
-        var obj = new Object();
-        obj.id = categoryid;
-        obj.displayed = displayed;    
-        callAjax(obj, url, callbackName);
-    });
 
     $(".iedit").mouseover(function(){
         $('.row-actions').hide();
@@ -55,7 +43,7 @@ $(document).ready(function(){
 });
 
 function doSortTableRow(){
-    $("#category-table").sortable({
+    $("#attribute-table").sortable({
     	handle:'button.move-row',
         helper: fixWidthHelper,
     	cancel: '',
@@ -63,15 +51,14 @@ function doSortTableRow(){
             var newProps = new Array(0);
             $('.iedit').each(function(i) { 
                 var sortNum = $(this).find('button.move-row').val();
-                var categoryid = $(this).find('button.move-row').attr('categoryid');
+                var attributechildid = $(this).find('button.move-row').attr('attributechildid');
 
                 var obj = new Object();
-                obj.categoryid = categoryid;
+                obj.id = attributechildid;
                 obj.sortNum = sortNum;
                 
                 newProps.push(obj);
             });
-            //alert(JSON.stringify(newProps));
             var callbackName = "updateSortPosition";
             callAjax(newProps, updateSortPosition, callbackName);
     	}
