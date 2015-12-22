@@ -17,9 +17,12 @@
                 <span class="view"><i class="fa fa-eye"></i> <a href="<%=basePath%>product_attribute_child/index/<%=data[i].id%>" title="View Child" rel="permalink">View Child</a></span>
             </div>
         </td>
+        <td>
+            <div><%=data[i].public_name%></div>
+        </td>
         <td class="pointer dragHandle center">
             <div class="dragGroup">
-                    <button type="button" class="btn btn-link move-row ui-sortable-handle" attributegroupid="<%=data[i].id%>" value="<%=data[i].position%>">
+                    <button type="button" class="btn btn-link move-row ui-sortable-handle" categoryid="<%=data[i].id%>" value="<%=data[i].position%>">
                     <i class="fa fa-arrows fa-lg"></i></button>
             </div>
         </td>
@@ -27,46 +30,3 @@
     <%
 }
 %>
-<script>
-$(document).ready(function(){
-    
-    doSortTableRow();
-    $('.row-actions').hide();
-
-    $(".iedit").mouseover(function(){
-        $('.row-actions').hide();
-        $(this).find('.row-actions').show();
-    });
-
-});
-
-function doSortTableRow(){
-    $("#attribute-table").sortable({
-    	handle:'button.move-row',
-        helper: fixWidthHelper,
-    	cancel: '',
-    	update: function(event, ui) {
-            var newProps = new Array(0);
-            $('.iedit').each(function(i) { 
-                var sortNum = $(this).find('button.move-row').val();
-                var attributegroupid = $(this).find('button.move-row').attr('attributegroupid');
-
-                var obj = new Object();
-                obj.id = attributegroupid;
-                obj.sortNum = sortNum;
-                
-                newProps.push(obj);
-            });
-            var callbackName = "updateSortPosition";
-            callAjax(newProps, updateSortPosition, callbackName);
-    	}
-    });
-}
-
-function fixWidthHelper(e, ui) {
-    ui.children().each(function() {
-        $(this).width($(this).width());
-    });
-    return ui;
-}
-</script>

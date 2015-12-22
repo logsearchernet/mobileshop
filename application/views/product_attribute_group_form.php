@@ -10,9 +10,8 @@
             </li>
         </ul>
     </div>
-
-
 </div>
+<br/>
 <div class="col-lg-offset-1 col-md-8">
 <?php echo validation_errors(); ?>
 <?php
@@ -50,7 +49,6 @@ $inputAttributes = 'class="form-control"';
                     <select id="attribute_type" name="attribute_type" class="form-control">
                         <option value="select" <?php echo ($attribute->attribute_type == "select")?"selected":"";?>>Drop-down list</option>
                         <option value="radio" <?php echo ($attribute->attribute_type == "radio")?"selected":"";?>>Radio buttons</option>
-                        <option value="color" <?php echo ($attribute->attribute_type == "color")?"selected":"";?>>Color or texture</option>
                     </select>
                     <?php echo form_hidden('id', $attribute->id);?>
                 </div>
@@ -62,7 +60,7 @@ $inputAttributes = 'class="form-control"';
                     <a href="<?php echo site_url('product_attribute_group/') ?>" class="btn btn-primary ink-reaction">Cancel</a>
                 </div>
                 <div class="col-lg-6 text-right">
-                    <button type="submit" class="btn btn-primary ink-reaction"><?php echo (isset($product_attribute->id) ? "Update category" : "Create category"); ?></button>
+                    <button type="submit" class="btn btn-primary ink-reaction"><?php echo (isset($attribute->id) ? "Update category" : "Create category"); ?></button>
                 </div>
             </div>
         </div>

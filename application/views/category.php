@@ -16,8 +16,8 @@
         <div class="btn-toolbar">
             <a href="#" class="toolbar_btn dropdown-toolbar navbar-toggle" data-toggle="collapse" data-target="#toolbar-nav"><i class="process-icon-dropdown"></i><div>Menu</div></a>
             <ul id="toolbar-nav" class="nav nav-pills pull-right collapse navbar-collapse">
-                <li>
-                    <a class="toolbar_btn  pointer text-center" href="<?php echo site_url('category/category_form') ?>">
+                <li>    
+                    <a class="toolbar_btn  pointer text-center" href="<?php echo site_url('category/category_form/0/'.$id.'/') ?>">
                         <i class="fa fa-plus-circle fa-2x"></i>
                         <div>Add new category</div>
                     </a>
@@ -31,7 +31,7 @@
 
 <ul class="breadcrumb">
     <li>
-        <a href="<?php echo site_url('/category/category_view/');?>"><i class="fa fa-home"></i>Home</a>
+        <a href="<?php echo site_url('/category/');?>"><i class="fa fa-home"></i>Home</a>
     </li>
     <?php if (isset($categoryNames)): ?>
     <?php foreach ($categoryNames as $id => $name):?>
@@ -50,9 +50,21 @@
             <tr>
                 <th style="width: 10%;">&nbsp;</th>
                 <th style="width: 10%;">#</th>
-                <th style="width: 30%;">Name</th>
-                <th style="width: 30%;">Description</th>
-                <th style="width: 10%;">Position</th>
+                <th style="width: 30%;">
+                    Name
+                    <span class="sort-col" orderby="name" orderway="asc"><i class="fa fa-caret-up"></i></span>
+                    <span class="sort-col"  orderby="name" orderway="desc"><i class="fa fa-caret-down"></i></span>
+                </th>
+                <th style="width: 30%;">
+                    Description
+                    <span class="sort-col" orderby="description" orderway="asc"><i class="fa fa-caret-up"></i></span>
+                    <span class="sort-col"  orderby="description" orderway="desc"><i class="fa fa-caret-down"></i></span>
+                </th>
+                <th style="width: 10%;">
+                    Position
+                    <span class="sort-col" orderby="position" orderway="asc"><i class="fa fa-caret-up"></i></span>
+                    <span class="sort-col"  orderby="position" orderway="desc"><i class="fa fa-caret-down"></i></span>
+                </th>
                 <th style="width: 10%;">Displayed</th>
             </tr>
             <tr class="style-default-light">
@@ -83,7 +95,7 @@
                 </th>
             </tr>
         </thead>
-        <tbody id="category-table">
+        <tbody id="table-render">
             <!-- LOAD AJAX With CONTENT -->
         </tbody>
     </table>
@@ -120,19 +132,40 @@
 </div>
 <script>
 var basePath = "<?php echo site_url('')?>";
-var url = basePath+"category/ajax_category_table";
+var urlRenderTable = basePath+"category/ajax_category_table";
 var updateSortPosition = basePath+"category/ajax_category_sort_position";
+var urlDisplay = basePath+"category/ajax_category_displayed";
 var offset = 0;
 var totalCount = <?php echo $count?>;
 var limit = <?php echo $limit?>;
-var parent = <?php echo $parent?>;
+var parent = <?php echo $id?>;
+var callbackTableInit = "categoryTableInit";
+var callbackTable = "categoryTable";
+var templateTable = basePath+"template/categoryTable.ejs";
 $(document).ready(function(){
     
     $(window).load(function(){
         
         var success = '<?php echo $success?>';
-        renderTable(success);
+        
+        var table = new Table('', '', parent, '', '', '', '', '');
+        table.init(urlRenderTable, updateSortPosition,urlDisplay, callbackTableInit, callbackTable, templateTable);
+        table.renderTable(success);
+        table.doSortTableRow();
         $('.filter-clear').hide();
+    });
+    
+    $(document).on('click','.sort-col', function(e) {
+        var orderby = $(this).attr('orderby');
+        var orderway = $(this).attr('orderway');
+        offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
+        var filter = "";
+        var filterName = "";
+        var deleteItems = "";
+        var displayed = "";
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed)
+        
+        table.callAjax(urlRenderTable, callbackTable);
     });
     
     $(document).on('keyup','.filterColumn', function(e) {
@@ -142,17 +175,18 @@ $(document).ready(function(){
             $(this).siblings('.filter-clear').hide();
         }
         
-        filterByName(e, parent);
+        
+        Table.prototype.filterByName(e, parent);
     });
     
     $( "#displayed").change(function(e) {
-        filterByName(e, parent);
+        Table.prototype.filterByName(e, parent);
     });
     
     $(document).on('click','.filter-clear', function(e) {
         $(this).siblings('.filterColumn').val('');
         $(this).hide();
-        filterByName(e, parent);
+        Table.prototype.filterByName(e, parent);
         
     });
     
@@ -170,15 +204,15 @@ $(document).ready(function(){
     
     $(document).on('click','.submitdelete', function(e) {
         var deleteItems = $(this).attr('id');
-        var obj = new Object();
         offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
-        obj.parent = parent;
-        obj.offset = offset;
-        obj.filter = "";
-        obj.filterName = "";
-        obj.deleteItems = deleteItems;
-        var callbackName = "categoryTable";
-        callAjax(obj, url, callbackName);
+        var orderby = '';
+        var orderway = '';
+        var filter = "";
+        var filterName = "";
+        var displayed = '';
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed);
+        var callbackName = callbackTable;
+        table.callAjax(urlRenderTable, callbackName);
     });
     
     $(document).on('click','#removeChecked', function(e) {
@@ -196,129 +230,15 @@ $(document).ready(function(){
         }); 
         
         offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
-        var obj = new Object();
-        obj.parent = parent;
-        obj.offset = offset;
-        obj.filter = "";
-        obj.filterName = "";
-        obj.deleteItems = deleteItems;
-        var callbackName = "categoryTable";
-        callAjax(obj, url, callbackName);
-    });
         
-    
+        var orderby = '';
+        var orderway = '';
+        var filter = "";
+        var filterName = "";
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed);
+        var callbackName = callbackTable;
+        table.callAjax(urlRenderTable, callbackName);
+    });
 });
-
-function renderTable(success){
-    var callbackName = "categoryTableInit";
-    if (success == 1){
-        callbackName = "categoryTable";
-    }
-    var obj = new Object();
-    obj.parent = parent;
-    obj.offset = 0;
-    obj.filter = "";
-    obj.filterName = "";
-    obj.deleteItems = "";
-    callAjax(obj, url, callbackName);
-}
-function callback(name, data) {
-    if (name == 'categoryTableInit'){
-        var content = new EJS({url: basePath+'template/categoryTable.ejs'}).render(data);
-        $("#category-table").html(content);
-         
-           
-        
-        $('#page-selection').bootpag({
-            total: Math.ceil(data.totalCount / limit),
-            maxVisible: 5,
-            page: (offset / limit) + 1
-        }).on("page", function(event,num){
-            $('#alert-updated').hide();
-            var obj = new Object();
-            offset = (num - 1) * limit;
-            obj.parent = parent;
-            obj.offset = offset;
-            obj.filter = "";
-            obj.filterName = "";
-            obj.deleteItems = "";
-            var callbackName = "categoryTableInit";
-            callAjax(obj, url, callbackName);
-        });
-    } else if (name == 'categoryTable') {
-        var content = new EJS({url: basePath+'template/categoryTable.ejs'}).render(data);
-        $("#category-table").html(content); 
-        $('#alert-updated').removeClass("hidden");
-        $('#alert-updated').fadeIn(500);
-        $('#alert-updated').fadeOut(3000);
-        
-        $('#page-selection').bootpag({
-            total: Math.ceil(data.totalCount / limit),
-            maxVisible: 5,
-            page: (offset / limit) + 1
-        }).on("page", function(event,num){
-            $('#alert-updated').hide();
-            var obj = new Object();
-            offset = (num - 1) * limit;
-            obj.parent = parent;
-            obj.offset = offset;
-            obj.filter = "";
-            obj.filterName = "";
-            obj.deleteItems = "";
-            var callbackName = "categoryTableInit";
-            callAjax(obj, url, callbackName);
-        });
-    } else if (name == 'categoryDisplay'){
-        $('#alert-status-updated').removeClass("hidden");
-        $('#alert-status-updated').fadeIn(500);
-        $('#alert-status-updated').fadeOut(3000);
-    } else if (name == 'updateSortPosition') {
-        //alert(JSON.stringify(data));
-        renderTable(1);
-    }
-}
-
-var requestDelay;
-var proname;
-
-function filterByName(e, parent){
-
-    var thisProname = "";
-    var filterName = "";
-    var parentId = parent;
-    var total = $('.filterColumn').length;
-    $('.filterColumn').each(function(index){
-        thisProname += $(this).val();
-        filterName +=  $(this).attr('id');
-        if (index != total - 1){
-            thisProname += "|";
-            filterName += "|";
-        }
-    });
-
-    if(e.which == 13 || thisProname == proname) {
-          return;
-    }
-
-   proname = thisProname;
-
-   // postpone the submit another 300 ms upon every new character
-   window.clearTimeout(requestDelay);  
-
-   requestDelay = window.setTimeout(function() {
-        var obj = new Object();
-        obj.parent = parentId;
-        obj.offset = offset;
-        obj.filter = proname;
-        obj.filterName = filterName;
-        obj.deleteItems = "";
-        var callbackName = "categoryTable";
-        callAjax(obj, url, callbackName)
-   }, 500);
-}
-
-
-
-
 </script>
   

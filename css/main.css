@@ -88,3 +88,7 @@
 .tree {
     list-style: none;
 } 
+
+.sort-col {
+    cursor: pointer;
+}

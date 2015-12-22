@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Category extends MY_Controller {
     
-    
+    var $limit = 0;
     
     public function __construct() {        
         parent::__construct();
@@ -10,16 +10,31 @@ class Category extends MY_Controller {
     /**
      * Index page for Dashboard controller.
      */
-    public function index($parent = 0) {
+    public function index($parent = 0, $id = 0) {
         $success = $this->input->get('success');
         $this->load->model('Category_Entity');
         $where = "parent_category = ". $parent;
         $count = $this->Category_Entity->count_by($where);
         
+        $categoryNames = array();
+        $parentTemp = $id;
+        $i = 0;
+        do {
+            $category = new Category_Entity();
+            $category->load($parentTemp);
+            $categoryNames[$category->id] = $category->name;
+            $i++;
+            $parentTemp = $category->parent_category;
+        } while ($parentTemp != 0);
+        
+        $reversed = array_reverse($categoryNames, true);
+        
         $this->data = array('count' => $count,
                             'limit' => $this->limit,
                             'success' => $success,
-                            'parent' => $parent);
+                            'parent' => $parent,
+                            '$categoryNames' => $reversed,
+                            'id' => $id);
         $this->content = 'category';
         $this->layout();
     }
@@ -53,23 +68,23 @@ class Category extends MY_Controller {
         $this->output->set_content_type('application/json');
         
         $cats = NULL;
-        $id_parent = intval($data->id);
-        $current_cat_id = $data->current_cat_id;
-        $parent_category = $data->parent_category;
+        $id_parent = intval($data->parentId);
+        $current_cat_id = $data->id;
+        //$parent_category = $data->parent_category;
         $this->load->model('Category_Entity');
-        if (isset($id_parent)) {
-            $where = "parent_category = ". $id_parent;
+        if (isset($current_cat_id)) {
+            $where = "parent_category = ". $current_cat_id;
             $cats = $this->Category_Entity->getByWhere($where);
         }
         
-        $current_cat = new Category_Entity();
-        $current_cat->load($current_cat_id);
+        //$current_cat = new Category_Entity();
+        //$current_cat->load($current_cat_id);
         
         $categories = array();
-        $categories2 = array();
+        //$categories2 = array();
         foreach ($cats as $cat) {
             $isLastChild = FALSE;
-            $checked = ($cat->id == $current_cat->parent_category)?TRUE:FALSE;
+            //$checked = ($cat->id == $current_cat->id)?TRUE:FALSE;
             $where2 = "parent_category = ". $cat->id;
             $cats2 = $this->Category_Entity->getByWhere($where2);
             if (empty($cats2)) {
@@ -80,7 +95,6 @@ class Category extends MY_Controller {
                 "parent_category" => $cat->parent_category,
                 "id" => $cat->id,
                 "lastChild" => $isLastChild,
-                "checked" => $checked,
             );
         }
         $data = new stdClass();
@@ -138,6 +152,8 @@ class Category extends MY_Controller {
         $data = json_decode($request_body);
         $this->output->set_content_type('application/json');
         
+        $orderby = $data->orderby;
+        $orderway = $data->orderway;
         $parent = $data->parent;
         $offset = $data->offset;
         $filterName = $data->filterName;
@@ -173,23 +189,26 @@ class Category extends MY_Controller {
             }
         }
         
-        $orderBy = "position asc";
+        $orderStr = "position asc";
+        if (isset($orderby) && !empty($orderby)){
+            $orderStr = $orderby ." ". $orderway;
+        } 
         $count = $this->Category_Entity->count_by($where);
-        $categories = $this->load_all($where, $this->limit, $offset, $orderBy);
+        $categories = $this->load_all($where, $this->limit, $offset, $orderStr);
         $categories->totalCount = $count;
+        $categories->parentId = $parent;
         
         echo json_encode($categories);
     }
     
-    public function category_form($id = 0) {
+    public function category_form($id = 0, $parentId = 0) {
         $this->load->helper('form');
         
         $this->load->model('Category_Entity');
-        $parent = 0;
         $category = new Category_Entity();
-        if (isset($id)){
+        if ($id > 0){
             $category->load($id);
-            $parent = $category->parent_category;
+            $parentId = $category->parent_category;
         } 
         
         $where = NULL;
@@ -202,19 +221,20 @@ class Category extends MY_Controller {
         
         $this->data = array('category' => $category,
                             'options' => $options,
+                             'parentId' => $parentId,
                             'id' => $id);
         $this->content = 'category_form';
         $this->layout();
     }
     
-    public function category_view($parent = 0) {
+    public function category_view($id = 0) {
         $success = $this->input->get('success');
         $this->load->model('Category_Entity');
-        $where = "parent_category = ". $parent;
+        $where = "parent_category = ". $id;
         $count = $this->Category_Entity->count_by($where);
         
         $categoryNames = array();
-        $parentTemp = $parent;
+        $parentTemp = $id;
         $i = 0;
         do {
             $category = new Category_Entity();
@@ -229,7 +249,7 @@ class Category extends MY_Controller {
         $this->data = array('count' => $count,
                             'limit' => $this->limit,
                             'success' => $success,
-                            'parent' => $parent,
+                            'id' => $id,
                             'categoryNames' => $reversed);
         
         $this->content = 'category';
@@ -245,7 +265,7 @@ class Category extends MY_Controller {
         $category = $this->save_category($this);
         $this->data = array('category' => $category);
         
-        redirect('/category/index/'. $category->parent_category .'?success=1', 'refresh');
+        redirect('/category/category_view/'. $category->parent_category .'?success=1', 'refresh');
     }
     
     /*public function category_remove($id = NULL) {

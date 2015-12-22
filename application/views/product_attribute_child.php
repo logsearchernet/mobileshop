@@ -37,9 +37,16 @@
             <tr>
                 <th style="width: 10%;">&nbsp;</th>
                 <th style="width: 10%;">#</th>
-                <th style="width: 30%;">Value</th>
-                <th style="width: 40%;">Color</th>
-                <th style="width: 10%;">Position</th>
+                <th style="width: 70%;">
+                    Value
+                    <span class="sort-col" orderby="value" orderway="asc"><i class="fa fa-caret-up"></i></span>
+                    <span class="sort-col"  orderby="value" orderway="desc"><i class="fa fa-caret-down"></i></span>
+                </th>
+                <th style="width: 10%;">
+                    Position
+                    <span class="sort-col" orderby="position" orderway="asc"><i class="fa fa-caret-up"></i></span>
+                    <span class="sort-col"  orderby="position" orderway="desc"><i class="fa fa-caret-down"></i></span>
+                </th>
             </tr>
             <tr class="style-default-light">
                 <th></th>
@@ -52,11 +59,9 @@
                 </th>
                 <th>
                 </th>
-                <th>
-                </th>
             </tr>
         </thead>
-        <tbody id="attribute-table">
+        <tbody id="table-render">
             <!-- LOAD AJAX With CONTENT -->
         </tbody>
     </table>
@@ -94,19 +99,40 @@
 
 <script>
 var basePath = "<?php echo site_url('')?>";
-var url = basePath+"product_attribute_child/ajax_attribute_child_table";
+var urlRenderTable = basePath+"product_attribute_child/ajax_attribute_child_table";
 var updateSortPosition = basePath+"product_attribute_child/ajax_attribute_child_sort_position";
 var offset = 0;
 var totalCount = <?php echo $count?>;
 var limit = <?php echo $limit?>;
 var parent = <?php echo $parentId?>;
+var callbackTableInit = "attributeChildTableInit";
+var callbackTable = "attributeChildTable";
+var templateTable = basePath+"template/attributeChildTable.ejs";
+var urlDisplay = "";
 $(document).ready(function(){
     
     $(window).load(function(){
         
         var success = '<?php echo $success?>';
-        renderTable(success);
+        
+        var table = new Table('', '', parent, '', '', '', '', '');
+        table.init(urlRenderTable, updateSortPosition,urlDisplay, callbackTableInit, callbackTable, templateTable);
+        table.renderTable(success);
+        table.doSortTableRow();
         $('.filter-clear').hide();
+    });
+    
+    $(document).on('click','.sort-col', function(e) {
+        var orderby = $(this).attr('orderby');
+        var orderway = $(this).attr('orderway');
+        offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
+        var filter = "";
+        var filterName = "";
+        var deleteItems = "";
+        var displayed = "";
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed)
+        
+        table.callAjax(urlRenderTable, callbackTable);
     });
     
     $(document).on('keyup','.filterColumn', function(e) {
@@ -116,17 +142,18 @@ $(document).ready(function(){
             $(this).siblings('.filter-clear').hide();
         }
         
-        filterByName(e, parent);
+        
+        Table.prototype.filterByName(e, parent);
     });
     
     $( "#displayed").change(function(e) {
-        filterByName(e, parent);
+        Table.prototype.filterByName(e, parent);
     });
     
     $(document).on('click','.filter-clear', function(e) {
         $(this).siblings('.filterColumn').val('');
         $(this).hide();
-        filterByName(e, parent);
+        Table.prototype.filterByName(e, parent);
         
     });
     
@@ -144,15 +171,15 @@ $(document).ready(function(){
     
     $(document).on('click','.submitdelete', function(e) {
         var deleteItems = $(this).attr('id');
-        var obj = new Object();
         offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
-        obj.parent = parent;
-        obj.offset = offset;
-        obj.filter = "";
-        obj.filterName = "";
-        obj.deleteItems = deleteItems;
-        var callbackName = "attributeTable";
-        callAjax(obj, url, callbackName);
+        var orderby = '';
+        var orderway = '';
+        var filter = "";
+        var filterName = "";
+        var displayed = '';
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed);
+        var callbackName = callbackTable;
+        table.callAjax(urlRenderTable, callbackName);
     });
     
     $(document).on('click','#removeChecked', function(e) {
@@ -170,101 +197,17 @@ $(document).ready(function(){
         }); 
         
         offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
-        var obj = new Object();
-        obj.parent = parent;
-        obj.offset = offset;
-        obj.filter = "";
-        obj.filterName = "";
-        obj.deleteItems = deleteItems;
-        var callbackName = "attributeTable";
-        callAjax(obj, url, callbackName);
+        
+        var orderby = '';
+        var orderway = '';
+        var filter = "";
+        var filterName = "";
+        var displayed = "";
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed);
+        var callbackName = callbackTable;
+        table.callAjax(urlRenderTable, callbackName);
     });
+    
 });
 
-function renderTable(success){
-    var callbackName = "attributeChildTableInit";
-    if (success == 1){
-        callbackName = "attributeChildTable";
-    }
-    var obj = new Object();
-    obj.parent = parent;
-    obj.offset = 0;
-    obj.filter = "";
-    obj.filterName = "";
-    obj.deleteItems = "";
-    callAjax(obj, url, callbackName);
-}
-
-function callback(name, data) {
-    if (name == 'attributeChildTableInit'){
-        var content = new EJS({url: basePath+'template/attributeChildTable.ejs'}).render(data);
-        $("#attribute-table").html(content);
-        
-        $('#page-selection').bootpag({
-            total: Math.ceil(data.totalCount / limit),
-            maxVisible: 5,
-            page: (offset / limit) + 1
-        }).on("page", function(event,num){
-            $('#alert-updated').hide();
-            var obj = new Object();
-            offset = (num - 1) * limit;
-            obj.parent = parent;
-            obj.offset = offset;
-            obj.filter = "";
-            obj.filterName = "";
-            obj.deleteItems = "";
-            var callbackName = "attributeTableInit";
-            callAjax(obj, url, callbackName);
-        });
-    } else if (name == 'attributeChildTable'){
-        var content = new EJS({url: basePath+'template/attributeChildTable.ejs'}).render(data);
-        $("#attribute-table").html(content); 
-        $('#alert-updated').removeClass("hidden");
-        $('#alert-updated').fadeIn(500);
-        $('#alert-updated').fadeOut(3000);
-        
-        $('#page-selection').bootpag({
-            total: Math.ceil(data.totalCount / limit),
-            maxVisible: 5,
-            page: (offset / limit) + 1
-        }).on("page", function(event,num){
-            $('#alert-updated').hide();
-            var obj = new Object();
-            offset = (num - 1) * limit;
-            obj.parent = parent;
-            obj.offset = offset;
-            obj.filter = "";
-            obj.filterName = "";
-            obj.deleteItems = "";
-            var callbackName = "attributeTableInit";
-            callAjax(obj, url, callbackName);
-        });
-    }else if (name == 'updateSortPosition') {
-        renderTable(1);
-    } else if (name == 'attributeTable'){
-        var content = new EJS({url: basePath+'template/attributeChildTable.ejs'}).render(data);
-        $("#attribute-table").html(content); 
-        $('#alert-updated').removeClass("hidden");
-        $('#alert-updated').fadeIn(500);
-        $('#alert-updated').fadeOut(3000);
-        $('.badge').html(data.data.length);
-        
-        $('#page-selection').bootpag({
-            total: Math.ceil(data.totalCount / limit),
-            maxVisible: 5,
-            page: (offset / limit) + 1
-        }).on("page", function(event,num){
-            $('#alert-updated').hide();
-            var obj = new Object();
-            offset = (num - 1) * limit;
-            obj.parent = parent;
-            obj.offset = offset;
-            obj.filter = "";
-            obj.filterName = "";
-            obj.deleteItems = "";
-            var callbackName = "attributeChildTableInit";
-            callAjax(obj, url, callbackName);
-        });
-    }
-}
 </script>

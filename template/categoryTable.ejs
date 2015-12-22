@@ -24,64 +24,9 @@
             </div>
         </td>
         <td>
-            <input id="switch-state" type="checkbox" name="displayed" categoryid="<%=data[i].id%>" <%=(data[i].displayed == '1')?'checked="checked"':''%>/>
+            <input id="switch-state" type="checkbox" class="displayed" categoryid="<%=data[i].id%>" <%=(data[i].displayed == '1')?'checked="checked"':''%>/>
         </td>
     </tr>
     <%
 }
 %>
-<script>
-$(document).ready(function(){
-    
-    doSortTableRow();
-    $('.row-actions').hide();
-    $("[name='displayed']").bootstrapSwitch();
-    $("[name='displayed']").on('switchChange.bootstrapSwitch', function(event, state) {
-        var categoryid = $(this).attr("categoryid");
-        var displayed = ($(this).attr("checked")=='checked')?1:0;
-        var url = basePath+"category/ajax_category_displayed";
-        var callbackName = "categoryDisplay";
-        var obj = new Object();
-        obj.id = categoryid;
-        obj.displayed = displayed;    
-        callAjax(obj, url, callbackName);
-    });
-
-    $(".iedit").mouseover(function(){
-        $('.row-actions').hide();
-        $(this).find('.row-actions').show();
-    });
-
-});
-
-function doSortTableRow(){
-    $("#category-table").sortable({
-    	handle:'button.move-row',
-        helper: fixWidthHelper,
-    	cancel: '',
-    	update: function(event, ui) {
-            var newProps = new Array(0);
-            $('.iedit').each(function(i) { 
-                var sortNum = $(this).find('button.move-row').val();
-                var categoryid = $(this).find('button.move-row').attr('categoryid');
-
-                var obj = new Object();
-                obj.categoryid = categoryid;
-                obj.sortNum = sortNum;
-                
-                newProps.push(obj);
-            });
-            //alert(JSON.stringify(newProps));
-            var callbackName = "updateSortPosition";
-            callAjax(newProps, updateSortPosition, callbackName);
-    	}
-    });
-}
-
-function fixWidthHelper(e, ui) {
-    ui.children().each(function() {
-        $(this).width($(this).width());
-    });
-    return ui;
-}
-</script>

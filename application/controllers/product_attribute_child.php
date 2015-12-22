@@ -1,6 +1,8 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Product_Attribute_Child extends MY_Controller {
     
+    var $limit = 0;
+    
     public function __construct() {        
         parent::__construct();
     }
@@ -32,6 +34,8 @@ class Product_Attribute_Child extends MY_Controller {
         $data = json_decode($request_body);
         $this->output->set_content_type('application/json');
         
+        $orderby = $data->orderby;
+        $orderway = $data->orderway;
         $parentId = $data->parent;
         $offset = $data->offset;
         $filterName = $data->filterName;
@@ -67,9 +71,12 @@ class Product_Attribute_Child extends MY_Controller {
             }
         }
         
-        $orderBy = "position asc";
+        $orderStr = "position asc";
+        if (isset($orderby) && !empty($orderby)){
+            $orderStr = $orderby ." ". $orderway;
+        } 
         $count = $this->Product_Attribute_Child_Entity->count_by($where);
-        $attributes = $this->load_all($where, $this->limit, $offset, $orderBy);
+        $attributes = $this->load_all($where, $this->limit, $offset, $orderStr);
         $attributes->totalCount = $count;
         
         echo json_encode($attributes);
@@ -84,7 +91,7 @@ class Product_Attribute_Child extends MY_Controller {
         $length = count($data);
         for ($i = 0; $i < $length; $i++) {
             $attr = $data[$i];
-            $id = $attr->id;
+            $id = $attr->categoryid;
             $sortNum = $attr->sortNum;
             
             $attribute = new Product_Attribute_Child_Entity();
@@ -141,6 +148,7 @@ class Product_Attribute_Child extends MY_Controller {
         $maxPosition = $attribute->max('position', $where);
         if (!empty($id)) {
             $attribute->load($id);
+            $attribute->position = intval($this->input->post('position'));
         } else {
             $attribute->created_date = date('Y-m-d h:i:sa', now());
             $where = "id =". $id;
@@ -151,7 +159,7 @@ class Product_Attribute_Child extends MY_Controller {
         $attribute->color = $this->input->post('color');
         $attribute->attribute_group = $this->input->post('attribute_group');
         
-        $attribute->position = intval($this->input->post('position'));
+        
         $attribute->modified_date = date('Y-m-d h:i:sa', now());
         $attribute->save();
         

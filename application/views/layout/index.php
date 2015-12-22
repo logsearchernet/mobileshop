@@ -68,6 +68,8 @@
                 <script src="<?php echo site_url('js/libs/jquery-ui/jquery-ui.min.js'); ?>"></script>
                 
                 <script src="<?php echo site_url('js/ejs_production.js'); ?>"></script>
+                <script src="<?php echo site_url('js/main-tree.js'); ?>"></script>
+                <script src="<?php echo site_url('js/main-table.js'); ?>"></script>
                 <script src="<?php echo site_url('js/main.js'); ?>"></script>
 
 <!--                <script src="<?php echo site_url('js/libs/DataTables/jquery.dataTables.min.js'); ?>"></script>

@@ -6,13 +6,15 @@
                 <a href="<?php echo site_url('product') ?>">Catalog</a>				
             </li>
             <li class="breadcrumb-current">
-                <a href="<?php echo site_url('product_attribute_child/index/'. $parentid) ?>">Product Attributes</a>
+                <a href="<?php echo site_url('product_attribute_group/') ?>">Product Attributes</a>
+            </li>
+            <li class="breadcrumb-current">
+                <a href="<?php echo site_url('product_attribute_child/index/'. $parentid) ?>">Product Attribute Values</a>
             </li>
         </ul>
     </div>
-
-
 </div>
+<br/>
 <div class="col-lg-offset-1 col-md-8">
 <?php echo validation_errors(); ?>
 <?php
@@ -49,6 +51,7 @@ $inputAttributes = 'class="form-control"';
                 </div>
             </div> 
             
+            <!--
             <div class="form-group">
                 <?php echo form_label('Color', 'color', $labelAttributes); ?>
                 <div class="col-sm-10">
@@ -62,16 +65,16 @@ $inputAttributes = 'class="form-control"';
                     </script>
                 </div>
             </div>
-            
+            -->
             
             
 
             <div class="row">
                 <div class="col-lg-6 text-left">
-                    <a href="<?php echo site_url('product_attribute_child/') ?>" class="btn btn-primary ink-reaction">Cancel</a>
+                    <a href="<?php echo site_url('product_attribute_child/index/'.$parentid) ?>" class="btn btn-primary ink-reaction">Cancel</a>
                 </div>
                 <div class="col-lg-6 text-right">
-                    <button type="submit" class="btn btn-primary ink-reaction"><?php echo (isset($product_attribute_child->id) ? "Update value" : "Create value"); ?></button>
+                    <button type="submit" class="btn btn-primary ink-reaction"><?php echo (isset($attribute->id) ? "Update value" : "Create value"); ?></button>
                 </div>
             </div>
         </div>

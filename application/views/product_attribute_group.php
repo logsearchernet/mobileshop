@@ -43,8 +43,21 @@
             <tr>
                 <th style="width: 10%;">&nbsp;</th>
                 <th style="width: 10%;">#</th>
-                <th style="width: 70%;">Name</th>
-                <th style="width: 10%;">Position</th>
+                <th style="width: 35%;">
+                    Name
+                    <span class="sort-col" orderby="name" orderway="asc"><i class="fa fa-caret-up"></i></span>
+                    <span class="sort-col"  orderby="name" orderway="desc"><i class="fa fa-caret-down"></i></span>
+                </th>
+                <th style="width: 35%;">
+                    Public Name
+                    <span class="sort-col" orderby="public_name" orderway="asc"><i class="fa fa-caret-up"></i></span>
+                    <span class="sort-col"  orderby="public_name" orderway="desc"><i class="fa fa-caret-down"></i></span>
+                </th>
+                <th style="width: 10%;">
+                    Position
+                    <span class="sort-col" orderby="position" orderway="asc"><i class="fa fa-caret-up"></i></span>
+                    <span class="sort-col"  orderby="position" orderway="desc"><i class="fa fa-caret-down"></i></span>
+                </th>
             </tr>
             <tr class="style-default-light">
                 <th></th>
@@ -56,10 +69,15 @@
                     </div>
                 </th>
                 <th>
+                    <div class="row input-outer"> 
+                        <input type="text" class="filterColumn" id="public_name" autocomplete="off">
+                        <i class="fa fa-close filter-clear"></i>
+                    </div>
                 </th>
+                <th></th>
             </tr>
         </thead>
-        <tbody id="attribute-table">
+        <tbody id="table-render">
             <!-- LOAD AJAX With CONTENT -->
         </tbody>
     </table>
@@ -97,19 +115,40 @@
 
 <script>
 var basePath = "<?php echo site_url('')?>";
-var url = basePath+"product_attribute_group/ajax_attribute_group_table";
+var urlRenderTable = basePath+"product_attribute_group/ajax_attribute_group_table";
 var updateSortPosition = basePath+"product_attribute_group/ajax_attribute_group_sort_position";
+var urlDisplay = "";
 var offset = 0;
 var totalCount = <?php echo $count?>;
 var limit = <?php echo $limit?>;
-var parent = 0;;
+var parent = <?php echo $id?>;
+var callbackTableInit = "attributeGroupTableInit";
+var callbackTable = "attributeGroupTable";
+var templateTable = basePath+"template/attributeGroupTable.ejs";
 $(document).ready(function(){
     
     $(window).load(function(){
         
         var success = '<?php echo $success?>';
-        renderTable(success);
+        
+        var table = new Table('', '', parent, '', '', '', '', '');
+        table.init(urlRenderTable, updateSortPosition,urlDisplay, callbackTableInit, callbackTable, templateTable);
+        table.renderTable(success);
+        table.doSortTableRow();
         $('.filter-clear').hide();
+    });
+    
+    $(document).on('click','.sort-col', function(e) {
+        var orderby = $(this).attr('orderby');
+        var orderway = $(this).attr('orderway');
+        offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
+        var filter = "";
+        var filterName = "";
+        var deleteItems = "";
+        var displayed = "";
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed)
+        
+        table.callAjax(urlRenderTable, callbackTable);
     });
     
     $(document).on('keyup','.filterColumn', function(e) {
@@ -119,13 +158,18 @@ $(document).ready(function(){
             $(this).siblings('.filter-clear').hide();
         }
         
-        filterByName(e, parent);
+        
+        Table.prototype.filterByName(e, parent);
+    });
+    
+    $( "#displayed").change(function(e) {
+        Table.prototype.filterByName(e, parent);
     });
     
     $(document).on('click','.filter-clear', function(e) {
         $(this).siblings('.filterColumn').val('');
         $(this).hide();
-        filterByName(e, parent);
+        Table.prototype.filterByName(e, parent);
         
     });
     
@@ -143,15 +187,15 @@ $(document).ready(function(){
     
     $(document).on('click','.submitdelete', function(e) {
         var deleteItems = $(this).attr('id');
-        var obj = new Object();
         offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
-        obj.parent = parent;
-        obj.offset = offset;
-        obj.filter = "";
-        obj.filterName = "";
-        obj.deleteItems = deleteItems;
-        var callbackName = "attributeGroupTable";
-        callAjax(obj, url, callbackName);
+        var orderby = '';
+        var orderway = '';
+        var filter = "";
+        var filterName = "";
+        var displayed = '';
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed);
+        var callbackName = callbackTable;
+        table.callAjax(urlRenderTable, callbackName);
     });
     
     $(document).on('click','#removeChecked', function(e) {
@@ -169,113 +213,15 @@ $(document).ready(function(){
         }); 
         
         offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
-        var obj = new Object();
-        obj.parent = parent;
-        obj.offset = offset;
-        obj.filter = "";
-        obj.filterName = "";
-        obj.deleteItems = deleteItems;
-        var callbackName = "attributeGroupTable";
-        callAjax(obj, url, callbackName);
+        
+        var orderby = '';
+        var orderway = '';
+        var filter = "";
+        var filterName = "";
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed);
+        var callbackName = callbackTable;
+        table.callAjax(urlRenderTable, callbackName);
     });
 });
 
-function renderTable(success){
-    var callbackName = "attributeGroupTableInit";
-    if (success == 1){
-        callbackName = "attributeGroupTable";
-    }
-    var obj = new Object();
-    obj.offset = 0;
-    obj.filter = "";
-    obj.filterName = "";
-    obj.deleteItems = "";
-    callAjax(obj, url, callbackName);
-}
-
-function callback(name, data) {
-    if (name == 'attributeGroupTableInit'){
-        var content = new EJS({url: basePath+'template/attributeGroupTable.ejs'}).render(data);
-        $("#attribute-table").html(content);
-        
-        $('#page-selection').bootpag({
-            total: Math.ceil(data.totalCount / limit),
-            maxVisible: 5,
-            page: (offset / limit) + 1
-        }).on("page", function(event,num){
-            $('#alert-updated').hide();
-            var obj = new Object();
-            offset = (num - 1) * limit;
-            obj.parent = parent;
-            obj.offset = offset;
-            obj.filter = "";
-            obj.filterName = "";
-            obj.deleteItems = "";
-            var callbackName = "attributeTableInit";
-            callAjax(obj, url, callbackName);
-        });
-    } else if (name == 'attributeGroupTable'){
-        var content = new EJS({url: basePath+'template/attributeGroupTable.ejs'}).render(data);
-        $("#attribute-table").html(content); 
-        $('#alert-updated').removeClass("hidden");
-        $('#alert-updated').fadeIn(500);
-        $('#alert-updated').fadeOut(3000);
-        
-        $('#page-selection').bootpag({
-            total: Math.ceil(data.totalCount / limit),
-            maxVisible: 5,
-            page: (offset / limit) + 1
-        }).on("page", function(event,num){
-            $('#alert-updated').hide();
-            var obj = new Object();
-            offset = (num - 1) * limit;
-            obj.parent = parent;
-            obj.offset = offset;
-            obj.filter = "";
-            obj.filterName = "";
-            obj.deleteItems = "";
-            var callbackName = "attributeTableInit";
-            callAjax(obj, url, callbackName);
-        });
-    }
-}
-
-var requestDelay;
-var proname;
-
-function filterByName(e, parent){
-
-    var thisProname = "";
-    var filterName = "";
-    var parentId = parent;
-    var total = $('.filterColumn').length;
-    $('.filterColumn').each(function(index){
-        thisProname += $(this).val();
-        filterName +=  $(this).attr('id');
-        if (index != total - 1){
-            thisProname += "|";
-            filterName += "|";
-        }
-    });
-
-    if(e.which == 13 || thisProname == proname) {
-          return;
-    }
-
-   proname = thisProname;
-
-   // postpone the submit another 300 ms upon every new character
-   window.clearTimeout(requestDelay);  
-
-   requestDelay = window.setTimeout(function() {
-        var obj = new Object();
-        obj.parent = parentId;
-        obj.offset = offset;
-        obj.filter = proname;
-        obj.filterName = filterName;
-        obj.deleteItems = "";
-        var callbackName = "attributeGroupTable";
-        callAjax(obj, url, callbackName)
-   }, 500);
-}
 </script>

@@ -1,6 +1,8 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Product_Attribute_Group extends MY_Controller {
     
+    var $limit = 0;
+    
     public function __construct() {        
         parent::__construct();
     }
@@ -8,7 +10,7 @@ class Product_Attribute_Group extends MY_Controller {
     /**
      * Index page for Dashboard controller.
      */
-    public function index() {
+    public function index($id = 0) {
         $success = $this->input->get('success');
         $this->load->model('Product_Attribute_Group_Entity');
         $where = NULL;
@@ -16,6 +18,7 @@ class Product_Attribute_Group extends MY_Controller {
         
         $this->data = array('count' => $count,
                             'limit' => $this->limit,
+                            'id' => $id,
                             'success' => $success);
         $this->content = 'product_attribute_group';
         $this->layout();
@@ -26,6 +29,8 @@ class Product_Attribute_Group extends MY_Controller {
         $data = json_decode($request_body);
         $this->output->set_content_type('application/json');
         
+        $orderby = $data->orderby;
+        $orderway = $data->orderway;
         $offset = $data->offset;
         $filterName = $data->filterName;
         $filter = $data->filter;
@@ -55,6 +60,9 @@ class Product_Attribute_Group extends MY_Controller {
             for ($i = 0; $i < $length; $i++) {
                 
                 $id = $deleteItemArr[$i];
+                if (empty($id)){
+                    continue;
+                }
                 $this->load->model('Product_Attribute_Group_Entity');
                 $attribute_group = new Product_Attribute_Group_Entity();
                 $attribute_group->id = $id;
@@ -71,10 +79,12 @@ class Product_Attribute_Group extends MY_Controller {
                 $attribute_group->delete();
             }
         }
-        
-        $orderBy = "position asc";
+        $orderStr = "position asc";
+        if (isset($orderby) && !empty($orderby)){
+            $orderStr = $orderby ." ". $orderway;
+        } 
         $count = $this->Product_Attribute_Group_Entity->count_by($where);
-        $attributes = $this->load_all($where, $this->limit, $offset, $orderBy);
+        $attributes = $this->load_all($where, $this->limit, $offset, $orderStr);
         /*foreach ($attributes->data as $attr){
             if (isset($attribute)){
                 $whereChild = "attribute_group = ". ($attr->id);
@@ -99,7 +109,7 @@ class Product_Attribute_Group extends MY_Controller {
         $length = count($data);
         for ($i = 0; $i < $length; $i++) {
             $attr = $data[$i];
-            $id = $attr->id;
+            $id = $attr->categoryid;
             $sortNum = $attr->sortNum;
             
             $attribute = new Product_Attribute_Group_Entity();
