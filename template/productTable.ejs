@@ -18,6 +18,12 @@
         <td><%=data[i].category%></td>
         <td><%=data[i].price%></td>
         <td><%=data[i].quantity%></td>
+        <td class="pointer dragHandle center">
+            <div class="dragGroup">
+                    <button type="button" class="btn btn-link move-row ui-sortable-handle" categoryid="<%=data[i].id%>" value="<%=data[i].position%>">
+                    <i class="fa fa-arrows fa-lg"></i></button>
+            </div>
+        </td>
         <td>
             <input id="switch-state" type="checkbox" class="displayed" categoryid="<%=data[i].id%>" <%=(data[i].displayed == '1')?'checked="checked"':''%>/>
         </td>

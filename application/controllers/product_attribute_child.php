@@ -79,6 +79,9 @@ class Product_Attribute_Child extends MY_Controller {
         $attributes = $this->load_all($where, $this->limit, $offset, $orderStr);
         $attributes->totalCount = $count;
         
+        $sql = $this->db->last_query();
+        $attributes->sql = $sql;
+        
         echo json_encode($attributes);
     }
     

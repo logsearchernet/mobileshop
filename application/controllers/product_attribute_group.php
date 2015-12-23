@@ -85,17 +85,11 @@ class Product_Attribute_Group extends MY_Controller {
         } 
         $count = $this->Product_Attribute_Group_Entity->count_by($where);
         $attributes = $this->load_all($where, $this->limit, $offset, $orderStr);
-        /*foreach ($attributes->data as $attr){
-            if (isset($attribute)){
-                $whereChild = "attribute_group = ". ($attr->id);
-                $countChild = $this->Product_Attribute_Child_Entity->count_by($whereChild);
-                //$attr->countChild = $countChild;
-                $attr->countChild = 100;
-            }
-            
-        }*/
         
         $attributes->totalCount = $count;
+        
+        $sql = $this->db->last_query();
+        $attributes->sql = $sql;
         
         echo json_encode($attributes);
     }

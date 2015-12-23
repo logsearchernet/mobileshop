@@ -187,7 +187,7 @@ function filterByName(e, parent){
 function hideLoadIndc() {
     
     //$('#busy_indicator').hide( "scale", { direction: "center" }, "slow" );
-    $('#content').addClass('animated bounce');
+    $('#content').addClass('animated slideInRight');
     setTimeout(function(){
         document.getElementById('busy_indicator').style.visibility = 'hidden';
     }, 200 );

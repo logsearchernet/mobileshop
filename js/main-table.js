@@ -125,6 +125,12 @@ Table.prototype =
                 dataType: "json",
                 success: function(data){
                     $('.badge').html(data.data.length);
+                    $('#show-sql').text(data.sql);
+                    var x = 'lightSpeedIn';
+                    $('#table-render').removeClass().addClass(x + ' animated').one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
+                        $(this).removeClass();
+                      });
+                        
                     if (name == callbackTableInit){
                         var content = new EJS({url: templateTable}).render(data);
                         $("#table-render").html(content);
@@ -154,6 +160,7 @@ Table.prototype =
                         }
                         $("input.displayed").bootstrapSwitch();
                     } else if (name == callbackTable) {
+                        
                         var content = new EJS({url: templateTable}).render(data);
                         $("#table-render").html(content); 
                         $('#alert-updated').removeClass("hidden");

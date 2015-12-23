@@ -20,10 +20,12 @@ class Category extends MY_Controller {
         $parentTemp = $id;
         $i = 0;
         do {
+            if ($id == 0) break;
             $category = new Category_Entity();
             $category->load($parentTemp);
             $categoryNames[$category->id] = $category->name;
             $i++;
+            
             $parentTemp = $category->parent_category;
         } while ($parentTemp != 0);
         
@@ -33,7 +35,7 @@ class Category extends MY_Controller {
                             'limit' => $this->limit,
                             'success' => $success,
                             'parent' => $parent,
-                            '$categoryNames' => $reversed,
+                            'categoryNames' => $reversed,
                             'id' => $id);
         $this->content = 'category';
         $this->layout();
@@ -197,6 +199,9 @@ class Category extends MY_Controller {
         $categories = $this->load_all($where, $this->limit, $offset, $orderStr);
         $categories->totalCount = $count;
         $categories->parentId = $parent;
+        
+        $sql = $this->db->last_query();
+        $categories->sql = $sql;
         
         echo json_encode($categories);
     }

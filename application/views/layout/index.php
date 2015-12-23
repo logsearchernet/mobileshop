@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Material Admin</title>
+		<title>Mobile Shop</title>
 
 		<!-- BEGIN META -->
 		<meta charset="utf-8">

@@ -1,6 +1,8 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Product extends MY_Controller {
     
+    var $limit = 0;
+    
     public function __construct() {        
         parent::__construct();
     }
@@ -13,7 +15,7 @@ class Product extends MY_Controller {
         $this->load->model('Product_Entity');
         $where = "category_id = ". $categoryid;
         $count = $this->Product_Entity->count_by($where);
-        
+       
         $this->data = array('count' => $count,
                             'limit' => $this->limit,
                             'category_id' => $categoryid,
@@ -116,7 +118,7 @@ class Product extends MY_Controller {
         $length = count($data);
         for ($i = 0; $i < $length; $i++) {
             $cat = $data[$i];
-            $id = $cat->productid;
+            $id = $cat->categoryid;
             $sortNum = $cat->sortNum;
             
             $product = new Product_Entity();
@@ -134,6 +136,8 @@ class Product extends MY_Controller {
         $data = json_decode($request_body);
         $this->output->set_content_type('application/json');
         
+        $orderby = $data->orderby;
+        $orderway = $data->orderway;
         $categoryid =  intval($data->parent);
         $offset = $data->offset;
         $filterName = $data->filterName;
@@ -179,10 +183,17 @@ class Product extends MY_Controller {
             }
         }
         
-        $orderBy = "position asc";
+        $orderStr = "position asc";
+        if (isset($orderby) && !empty($orderby)){
+            $orderStr = $orderby ." ". $orderway;
+        } 
+        
         $count = $this->Product_Entity->count_by($where);
-        $products = $this->load_all($where, $this->limit, $offset, $orderBy);
+        $products = $this->load_all($where, $this->limit, $offset, $orderStr);
         $products->totalCount = $count;
+        
+        $sql = $this->db->last_query();
+        $products->sql = $sql;
         
         echo json_encode($products);
     }

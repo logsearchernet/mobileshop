@@ -100,6 +100,7 @@
     <div id="page-selection"></div>
     <div class="card-body"></div>
 </div>
+<div id="show-sql"></div>
 <div id="alert-status-updated" class="alert alert-success hidden">
     <i class="fa fa-check-circle"> </i> The status has been updated successfully
 </div>
