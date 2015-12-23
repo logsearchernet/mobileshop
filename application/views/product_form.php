@@ -32,8 +32,8 @@ $inputAttributes = 'class="form-control"';
                     <?php echo form_label('Category', 'category', $labelAttributes); ?>
                     <div class=" col-sm-10">
                         <ul id="categories-tree" class="tree">
-                            <li class="tree-folder">
-                                <span class="tree-folder-name tree-selected" catid="">
+                            <li class="tree-folder" catid="0">
+                                <span class="tree-folder-name tree-selected">
                                     <input type="radio" name="parent_category" value="0" checked="checked">
                                     <i class="fa fa-folder"></i>
                                     <label class="tree-toggler">Home</label>
@@ -93,6 +93,41 @@ $inputAttributes = 'class="form-control"';
     <?php echo form_close(); ?>
 </div>
 <script>
+var basePath = "<?php echo site_url('')?>";
+var currentCategoryId = <?php echo $currentCategoryId?>;
+var parentId = <?php echo $categoryParentId?>;
+var urlExpandAll = basePath+"category/ajax_expandselected_tree";
+var urlTree = basePath+"category/ajax_tree";
+var callbackTree = "category-tree";
+var callbackSingleLevelTree = "category-single-level-tree";
+var callbackExpandselectedTree = "category-expandselected-tree";
+var templateTree = basePath+"template/categoryTree.ejs";
+
+$(document).ready(function(){
+    
+    var tree = new Tree(currentCategoryId,parentId);
+    tree.init(currentCategoryId, urlExpandAll, urlTree, callbackTree, callbackExpandselectedTree, callbackSingleLevelTree, templateTree);
+    tree.callTreeAjax(urlExpandAll, callbackExpandselectedTree);
+    
+    $(document).on('click','.tree-folder-name', function(e) {
+        var currentCategoryId = $(this).closest('li.tree-folder').attr('catid');
+        tree.openFolderSingleLevel(currentCategoryId);
+    });
+    
+    $("[name='displayed']").bootstrapSwitch();
+    
+    $("[name='description']").summernote({
+        height: 300,                 // set editor height
+        minHeight: null,             // set minimum height of editor
+        maxHeight: null,             // set maximum height of editor
+        focus: true                  // set focus to editable area after initializing summernote
+    });
+    
+    
+});
+
+</script>
+<script>/*
 var basePath = "<?php echo site_url('')?>";
 var url = basePath+"product/ajax_tree";
 var urlExpandAll = basePath+"product/ajax_expandselected_tree";

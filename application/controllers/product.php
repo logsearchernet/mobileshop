@@ -134,7 +134,7 @@ class Product extends MY_Controller {
         $data = json_decode($request_body);
         $this->output->set_content_type('application/json');
         
-        $categoryid =  $data->parent;
+        $categoryid =  intval($data->parent);
         $offset = $data->offset;
         $filterName = $data->filterName;
         $filter = $data->filter;
@@ -146,14 +146,14 @@ class Product extends MY_Controller {
         $this->load->model('Product_Entity');
         $this->load->model('Category_Entity');
         $where = NULL;
-        if (!empty($categoryid) && $categoryid >= 0) {
+        if (isset($categoryid) && $categoryid >= 0) {
             $where = "category_id = ". $categoryid;
         }
-        if (isset($where)){
-            $where .= " AND ";
-        }
+        
         if (isset($filterName) && !empty($filterName) && strlen($filterName) > 0) {
-            
+            if (isset($where)){
+                $where .= " AND ";
+            }
             $length = count($filterNameArr);
             
             for ($i = 0; $i < $length; $i++) {
@@ -187,16 +187,24 @@ class Product extends MY_Controller {
         echo json_encode($products);
     }
     
-    public function product_form($id = 0) {
+    public function product_form($id = 0, $currentCategoryId = 0) {
         $this->load->helper('form');
         
         $this->load->model('Product_Entity');
         $this->load->model('Category_Entity');
         $product = new Product_Entity();
-        if (isset($id)){
+        $category= new Category_Entity();
+        $categoryParentId = 0;
+        if ($id > 0){
             $product->load($id);
+            $currentCategoryId = $product->category_id;
+            $catId = $product->category_id;
+            $category->load($catId);
+            $categoryParentId = $category->parent_category;
         } 
         $this->data = array('product' => $product,
+                            'currentCategoryId' => $currentCategoryId,
+                            'categoryParentId' => $categoryParentId,
                             'id' => $id);
         $this->content = 'product_form';
         $this->layout();

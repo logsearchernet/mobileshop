@@ -17,7 +17,7 @@
             <a href="#" class="toolbar_btn dropdown-toolbar navbar-toggle" data-toggle="collapse" data-target="#toolbar-nav"><i class="process-icon-dropdown"></i><div>Menu</div></a>
             <ul id="toolbar-nav" class="nav nav-pills pull-right collapse navbar-collapse">
                 <li>
-                    <a class="toolbar_btn  pointer text-center" href="<?php echo site_url('product/product_form') ?>">
+                    <a class="toolbar_btn  pointer text-center" href="<?php echo site_url('product/product_form/0/'. $category_id .'/') ?>">
                         <i class="fa fa-plus-circle fa-2x"></i>
                         <div>Add new product</div>
                     </a>
@@ -156,22 +156,19 @@ var templateTree = basePath+"template/categoryTree.ejs";
 
 var urlRenderTable = basePath+"product/ajax_product_table";
 var updateSortPosition = basePath+"product/ajax_product_sort_position";
-var urlExpandAll = basePath+"product/ajax_expandselected_tree";
-var urlTree = basePath+"product/ajax_tree";
 var offset = 0;
 var totalCount = <?php echo $count?>;
 var limit = <?php echo $limit?>;
-var categoryid = <?php echo $category_id?>;
+var parent = <?php echo $category_id?>;
 var current_cat_id = 0;
 var expandselectedTree;
 var currentArrIndex = 0;
-var urlTree = basePath+"category/ajax_tree";
 var callbackTree = "category-tree";
 var callbackExpandselectedTree = "category-expandselected-tree";
-var templateTree = "template/categoryTree.ejs";
 var callbackTableInit = "productTableInit";
 var callbackTable = "productTable";
-var templateTable = "template/productTable.ejs";
+var templateTable = basePath+"template/productTable.ejs";
+var urlDisplay = basePath+"product/ajax_product_displayed";
 
 $(document).ready(function(){
     
@@ -183,7 +180,109 @@ $(document).ready(function(){
         var currentCategoryId = $(this).closest('li.tree-folder').attr('catid');
         tree.openFolderSingleLevel(currentCategoryId);
     });
+    $(window).load(function(){
+        
+        var success = '<?php echo $success?>';
+        
+        var table = new Table('', '', parent, '', '', '', '', '');
+        table.init(urlRenderTable, updateSortPosition,urlDisplay, callbackTableInit, callbackTable, templateTable);
+        table.renderTable(success);
+        table.doSortTableRow();
+        $('.filter-clear').hide();
+    });
     
+    $(document).on('click','input[name="parent_category"]', function(e) {
+        var table = new Table('', '', $(this).val(), '', '', '', '', '');
+        table.init(urlRenderTable, updateSortPosition,urlDisplay, callbackTableInit, callbackTable, templateTable);
+        table.renderTable(0);
+        
+        $('.toolbar_btn').attr('href', basePath+'product/product_form/0/'+$(this).val());
+    });
+    
+    $(document).on('click','.sort-col', function(e) {
+        var orderby = $(this).attr('orderby');
+        var orderway = $(this).attr('orderway');
+        offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
+        var filter = "";
+        var filterName = "";
+        var deleteItems = "";
+        var displayed = "";
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed)
+        
+        table.callAjax(urlRenderTable, callbackTable);
+    });
+    
+    $(document).on('keyup','.filterColumn', function(e) {
+        if ($(this).val() != ''){
+            $(this).siblings('.filter-clear').show();
+        } else {
+            $(this).siblings('.filter-clear').hide();
+        }
+        
+        Table.prototype.filterByName(e, parent);
+    });
+    
+    $( "#displayed").change(function(e) {
+        Table.prototype.filterByName(e, parent);
+    });
+    
+    $(document).on('click','.filter-clear', function(e) {
+        $(this).siblings('.filterColumn').val('');
+        $(this).hide();
+        Table.prototype.filterByName(e, parent);
+        
+    });
+    
+    $(document).on('click','#selectAll', function(e) {
+        $(':checkbox.checkItem').each(function(){
+            $(this).attr('checked', 'checked');
+        }); 
+    });
+    
+    $(document).on('click','#unselectAll', function(e) {
+        $(':checkbox.checkItem').each(function(){
+            $(this).removeAttr('checked');
+        }); 
+    });
+    
+    $(document).on('click','.submitdelete', function(e) {
+        var deleteItems = $(this).attr('id');
+        offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
+        var orderby = '';
+        var orderway = '';
+        var filter = "";
+        var filterName = "";
+        var displayed = '';
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed);
+        var callbackName = callbackTable;
+        table.callAjax(urlRenderTable, callbackName);
+    });
+    
+    $(document).on('click','#removeChecked', function(e) {
+        var deleteItems = "";
+        var total = $(':checkbox.checkItem').length;
+        var totalDel = 0;
+        $(':checkbox.checkItem').each(function(index){
+            if ($(this).is(':checked')) {
+                deleteItems += ($(this).val());
+                totalDel++;
+            }
+            if (index != total - 1){
+                deleteItems += "|";
+            }
+        }); 
+        
+        offset = (offset!= 0 && (offset%limit)==0)?(offset - limit):offset;
+        
+        var orderby = '';
+        var orderway = '';
+        var filter = "";
+        var filterName = "";
+        var table = new Table(orderby, orderway, parent, offset, filter, filterName, deleteItems, displayed);
+        var callbackName = callbackTable;
+        table.callAjax(urlRenderTable, callbackName);
+    });
+    /*
     $(window).load(function(){
         var success = '<?php echo $success?>';
         var callbackName = callbackTableInit;
@@ -193,7 +292,7 @@ $(document).ready(function(){
         renderTable(urlRenderTable, callbackName);
         $('.filter-clear').hide();
     });
-    /*
+    
     $(document).on('click','.tree-folder-name', function(e) {
         openFolder(e, $(this));
     });
