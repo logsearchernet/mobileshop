@@ -210,8 +210,10 @@ class Product extends MY_Controller {
             $product->load($id);
             $currentCategoryId = $product->category_id;
             $catId = $product->category_id;
-            $category->load($catId);
-            $categoryParentId = $category->parent_category;
+            if ($catId > 0) {
+                $category->load($catId);
+                $categoryParentId = $category->parent_category;
+            }
         } 
         $this->data = array('product' => $product,
                             'currentCategoryId' => $currentCategoryId,
